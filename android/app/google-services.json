@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "346213444964",
+    "project_id": "ai-assistance-4a90a",
+    "storage_bucket": "ai-assistance-4a90a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346213444964:android:bcf28297712b3bf0079e71",
+        "android_client_info": {
+          "package_name": "com.ai.ardit.ai_assistant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoosf-EoFEBHkEBvFd0BoGh7bIedKbfbE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
