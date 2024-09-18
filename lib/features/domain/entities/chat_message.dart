@@ -1,6 +1,5 @@
-// lib/domain/entities/chat_message.dart
 class ChatMessage {
-  final String sender; // 'You' or 'Bot'
+  final String sender;
   final String message;
   final DateTime timestamp;
 

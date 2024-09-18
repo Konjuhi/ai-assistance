@@ -19,8 +19,8 @@ final chatDataSourceProvider = Provider<ChatDataSource>((ref) {
   return FirebaseChatDataSource(ref.watch(firestoreProvider));
 });
 
-final imageDataSourceProvider = Provider<ImageDataSource>((ref) {
-  return FirebaseImageDataSource(ref.watch(firestoreProvider));
+final imageDataSourceProvider = Provider<FirebaseImageDataSource>((ref) {
+  return FirebaseImageDataSource(FirebaseFirestore.instance);
 });
 
 // Repositories Implementations

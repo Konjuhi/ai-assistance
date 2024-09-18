@@ -28,8 +28,6 @@ class AIService {
       String answer = res.text!;
       log('Response: $answer');
 
-      // Get the current user ID
-
       return answer;
     } catch (e) {
       log('getAnswer Error: $e');

@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'features/presentation/screens/chat_screen.dart';
+import 'features/presentation/screens/home_screen.dart';
 import 'features/presentation/screens/image_generator_screen.dart';
 import 'firebase_providers.dart';
-import 'home_screen.dart';
 
 class AuthStateChangeNotifier extends ChangeNotifier {
   AuthStateChangeNotifier() {
@@ -51,7 +51,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'profile',
             builder: (context, state) => ProfileScreen(
-              appBar: AppBar(),
+              appBar: AppBar(
+                title: const Text('Profile'),
+              ),
               providers: authProviders,
               actions: [
                 SignedOutAction((context) {

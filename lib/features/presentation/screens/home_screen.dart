@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class HomeScreen extends StatelessWidget {
+import '../notifiers/home_notifier.dart';
+
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> options = [
-      {'title': 'AI Chatbot', 'route': '/chat'},
-      {'title': 'Image Generation', 'route': '/image-generation'},
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final options = ref.watch(homeProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -26,14 +27,23 @@ class HomeScreen extends StatelessWidget {
       body: ListView.builder(
         itemCount: options.length,
         itemBuilder: (context, index) {
+          final option = options[index];
           return Card(
             child: ListTile(
-              title: Text(options[index]['title']!),
+              title: Text(option.title),
               onTap: () {
-                context.push(options[index]['route']!);
+                context.push(option.route);
               },
             ),
-          );
+          )
+              .animate()
+              .slideY(
+                begin: 1.0,
+                end: 0.0,
+                duration: 500.ms,
+                curve: Curves.easeOut,
+              )
+              .fadeIn();
         },
       ),
     );

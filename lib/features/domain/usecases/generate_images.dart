@@ -1,4 +1,3 @@
-// lib/domain/usecases/image/generate_image.dart
 import '../entities/image_entity.dart';
 import '../repositories/image_repository.dart';
 

@@ -1,5 +1,3 @@
-// lib/data/models/image_model.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/image_entity.dart';

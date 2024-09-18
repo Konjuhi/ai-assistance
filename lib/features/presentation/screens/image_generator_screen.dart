@@ -1,9 +1,6 @@
-// lib/presentation/screens/image_generation_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../data/datasources/remote/image_service.dart';
-import '../../domain/entities/image_entity.dart';
 import '../providers.dart';
 
 class ImageGenerationScreen extends ConsumerStatefulWidget {
@@ -16,7 +13,6 @@ class ImageGenerationScreen extends ConsumerStatefulWidget {
 
 class _ImageGenerationScreenState extends ConsumerState<ImageGenerationScreen> {
   final TextEditingController _controller = TextEditingController();
-  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -27,25 +23,16 @@ class _ImageGenerationScreenState extends ConsumerState<ImageGenerationScreen> {
       appBar: AppBar(title: const Text('Image Generation')),
       body: Column(
         children: [
-          if (_isLoading) const LinearProgressIndicator(),
+          if (imageState is AsyncLoading) const LinearProgressIndicator(),
           Expanded(
             child: imageState.when(
-              data: (images) {
-                if (images.isEmpty) {
-                  return const Center(child: Text('No images generated yet'));
+              data: (image) {
+                if (image == null) {
+                  return const Center(child: Text('No image generated yet'));
                 }
-                return GridView.builder(
+                return Padding(
                   padding: const EdgeInsets.all(8.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                  ),
-                  itemCount: images.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Image.network(images[index].imageUrl),
-                    );
-                  },
+                  child: Image.network(image.imageUrl),
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
@@ -66,33 +53,7 @@ class _ImageGenerationScreenState extends ConsumerState<ImageGenerationScreen> {
               final prompt = _controller.text.trim();
               if (prompt.isEmpty) return;
 
-              setState(() {
-                _isLoading = true;
-              });
-
-              try {
-                final imageUrl = await ImageService.searchAiImage(prompt);
-                if (imageUrl.isNotEmpty) {
-                  final image = ImageEntity(
-                    imageUrl: imageUrl,
-                    prompt: prompt,
-                    timestamp: DateTime.now(),
-                  );
-                  await imageNotifier.addImage(image);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No images found')),
-                  );
-                }
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
-                );
-              } finally {
-                setState(() {
-                  _isLoading = false;
-                });
-              }
+              await imageNotifier.generateImage(prompt);
             },
             child: const Text('Generate Image'),
           ),

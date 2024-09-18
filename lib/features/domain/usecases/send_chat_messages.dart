@@ -12,7 +12,6 @@ class SendChatMessage {
     try {
       await repository.sendChatMessage(message, userId);
     } on ServerExceptionn catch (e) {
-      // Convert the exception to a failure
       throw ServerFailure(message: e.message);
     }
   }

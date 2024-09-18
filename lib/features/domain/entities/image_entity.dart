@@ -1,4 +1,3 @@
-// lib/domain/entities/image_entity.dart
 class ImageEntity {
   final String imageUrl;
   final String prompt;

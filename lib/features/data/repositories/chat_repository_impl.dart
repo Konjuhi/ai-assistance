@@ -2,7 +2,7 @@ import '../../core/errors/exceptions.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/firebase_chat_datasource.dart';
-import '../models/chat_message_model.dart'; // Import the model
+import '../models/chat_message_model.dart';
 
 class ChatRepositoryImpl implements ChatRepository {
   final ChatDataSource dataSource;
@@ -38,10 +38,8 @@ class ChatRepositoryImpl implements ChatRepository {
               ))
           .toList());
     } on ServerExceptionn catch (e) {
-      // Re-throw the exception to be handled in the use case
       rethrow;
     } catch (e) {
-      // Wrap any other exception in a ServerException
       throw ServerExceptionn(message: e.toString());
     }
   }

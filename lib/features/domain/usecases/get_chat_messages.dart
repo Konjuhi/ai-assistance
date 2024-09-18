@@ -12,7 +12,6 @@ class GetChatMessages {
     try {
       yield* repository.getChatMessages(userId);
     } on ServerExceptionn catch (e) {
-      // Convert the exception to a failure
       throw ServerFailure(message: e.message);
     }
   }

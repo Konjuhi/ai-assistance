@@ -1,13 +1,11 @@
-// lib/domain/providers.dart
 import 'package:ai_assistant/features/domain/usecases/generate_images.dart';
 import 'package:ai_assistant/features/domain/usecases/get_images.dart';
 import 'package:ai_assistant/features/domain/usecases/send_chat_messages.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/providers.dart'; // Import data providers to get repository implementations
+import '../data/providers.dart';
 import 'usecases/get_chat_messages.dart';
 
-// Use Cases
 final getChatMessagesUseCaseProvider = Provider<GetChatMessages>((ref) {
   return GetChatMessages(ref.watch(chatRepositoryProvider));
 });

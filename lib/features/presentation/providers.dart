@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/providers.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/entities/image_entity.dart';
 import '../domain/providers.dart'; // Import domain providers for use cases
@@ -33,11 +34,13 @@ final chatNotifierProvider =
 });
 
 // Image Notifier
+// Image Notifier
 final imageNotifierProvider =
-    StateNotifierProvider<ImageNotifier, AsyncValue<List<ImageEntity>>>((ref) {
+    StateNotifierProvider<ImageNotifier, AsyncValue<ImageEntity?>>((ref) {
   return ImageNotifier(
-    getImagesUseCase: ref.watch(getImagesUseCaseProvider),
     generateImageUseCase: ref.watch(generateImageUseCaseProvider),
+    imageDataSource:
+        ref.watch(imageDataSourceProvider), // Add the image data source
     userId: ref.watch(userIdProvider),
   );
 });

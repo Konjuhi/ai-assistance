@@ -1,10 +1,10 @@
-// lib/data/datasources/firebase_chat_datasource.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/chat_message_model.dart';
 
 abstract class ChatDataSource {
   Stream<List<ChatMessageModel>> getChatMessages(String userId);
+
   Future<void> sendChatMessage(ChatMessageModel message, String userId);
 }
 

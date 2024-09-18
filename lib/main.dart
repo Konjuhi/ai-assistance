@@ -18,6 +18,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp.router(
       routerConfig: router,
+      debugShowCheckedModeBanner: false,
       title: 'AI Assistant App',
       theme: ThemeData(
         primarySwatch: Colors.blue,

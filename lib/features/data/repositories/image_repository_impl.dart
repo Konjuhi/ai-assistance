@@ -1,5 +1,3 @@
-// lib/data/repositories/image_repository_impl.dart
-
 import '../../domain/entities/image_entity.dart';
 import '../../domain/repositories/image_repository.dart';
 import '../datasources/firebase_image_datasource.dart';

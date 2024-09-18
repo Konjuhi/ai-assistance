@@ -1,14 +1,13 @@
 abstract class Failure {
   final String message;
+
   Failure({required this.message});
 }
 
 class ServerFailure extends Failure {
-  ServerFailure({required String message}) : super(message: message);
+  ServerFailure({required super.message});
 }
 
 class CacheFailure extends Failure {
-  CacheFailure({required String message}) : super(message: message);
+  CacheFailure({required super.message});
 }
-
-// Add other custom failures as needed

@@ -17,10 +17,8 @@ class ImageService {
       if (images.isNotEmpty) {
         String imageUrl = images[0]['src'].toString();
 
-        // Get the current user ID
         final String userId = FirebaseAuth.instance.currentUser!.uid;
 
-        // Store the prompt and image URL in Firestore
         await FirebaseFirestore.instance.collection('image_history').add({
           'userId': userId,
           'prompt': prompt,
