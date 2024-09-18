@@ -19,6 +19,19 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     _loadMessages();
   }
 
+  void loadDataForUser(String userId) {
+    state = const AsyncLoading();
+    getChatMessagesUseCase(userId).listen((messages) {
+      state = AsyncData(messages);
+    }, onError: (e) {
+      state = AsyncError(e, StackTrace.current);
+    });
+  }
+
+  void clearState() {
+    state = const AsyncData([]);
+  }
+
   void _loadMessages() {
     getChatMessagesUseCase(userId).listen((messages) {
       state = AsyncData(messages);

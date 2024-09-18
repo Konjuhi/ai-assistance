@@ -18,6 +18,23 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
     _loadLastImage();
   }
 
+  void loadDataForUser(String userId) {
+    state = const AsyncLoading();
+    imageDataSource.getLastImage(userId).listen((image) {
+      if (image != null) {
+        state = AsyncData(image);
+      } else {
+        state = const AsyncData(null);
+      }
+    }, onError: (e) {
+      state = AsyncError(e, StackTrace.current);
+    });
+  }
+
+  void clearState() {
+    state = const AsyncData(null);
+  }
+
   void _loadLastImage() {
     imageDataSource.getLastImage(userId).listen((image) {
       if (image != null) {
