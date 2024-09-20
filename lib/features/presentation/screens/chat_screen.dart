@@ -45,15 +45,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatNotifier = ref.read(chatNotifierProvider.notifier);
     final isSendingMessage = chatNotifier.isSendingMessage;
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('AI Chatbot')),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('AI Chatbot')),
+      body: SafeArea(
+        child: Column(
           children: [
             Expanded(
               child: chatState.when(
                 data: (messages) {
-                  // Scroll to bottom only if new messages are added
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     _scrollToBottom();
                   });
@@ -95,10 +94,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       final question = _controller.text.trim();
                       if (question.isEmpty) return;
                       _controller.clear();
-
                       await chatNotifier.sendMessageAndFetchResponse(question);
-
-                      // Scroll to bottom smoothly after sending a message
                       _scrollToBottom(smooth: true);
                     },
                   ),

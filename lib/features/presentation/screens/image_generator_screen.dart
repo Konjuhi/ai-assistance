@@ -12,10 +12,10 @@ class ImageGenerationScreen extends ConsumerWidget {
     final imageNotifier = ref.read(imageNotifierProvider.notifier);
     final TextEditingController controller = TextEditingController();
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Image Generation')),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Image Generation')),
+      body: SafeArea(
+        child: Column(
           children: [
             if (imageState is AsyncLoading) const LinearProgressIndicator(),
             Expanded(
