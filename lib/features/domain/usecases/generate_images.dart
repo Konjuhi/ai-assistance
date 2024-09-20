@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+
+import '../../core/errors/failures.dart';
 import '../entities/image_entity.dart';
 import '../repositories/image_repository.dart';
 
@@ -6,7 +9,12 @@ class GenerateImage {
 
   GenerateImage(this.repository);
 
-  Future<void> call(ImageEntity image, String userId) {
-    return repository.addImage(image, userId);
+  Future<Either<Failure, void>> call(ImageEntity image, String userId) async {
+    try {
+      await repository.addImage(image, userId);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
   }
 }

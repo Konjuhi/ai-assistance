@@ -17,19 +17,13 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,4 +53,24 @@ class DefaultFirebaseOptions {
     projectId: 'ai-assistance-4a90a',
     storageBucket: 'ai-assistance-4a90a.appspot.com',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyC2Xmd3HroqHJ7v3b0JaJaUJ7GBBUk5qew',
+    appId: '1:346213444964:web:09a5a8b4a1e32afe079e71',
+    messagingSenderId: '346213444964',
+    projectId: 'ai-assistance-4a90a',
+    authDomain: 'ai-assistance-4a90a.firebaseapp.com',
+    storageBucket: 'ai-assistance-4a90a.appspot.com',
+    measurementId: 'G-FZ1F9RNNXM',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCtgEh15-8rGGNfYbmwjNZC1aQuvKGZvGc',
+    appId: '1:346213444964:ios:7d14ac42ac373bec079e71',
+    messagingSenderId: '346213444964',
+    projectId: 'ai-assistance-4a90a',
+    storageBucket: 'ai-assistance-4a90a.appspot.com',
+    iosBundleId: 'com.ai.ardit.aiAssistant',
+  );
+
 }

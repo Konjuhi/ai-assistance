@@ -1,46 +1,66 @@
-// lib/presentation/providers.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/providers.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/entities/image_entity.dart';
-import '../domain/providers.dart'; // Import domain providers for use cases
+import '../domain/providers.dart';
 import 'notifiers/chat_notifier.dart';
 import 'notifiers/image_notifier.dart';
 
-// Firebase Auth instance (specific to presentation layer)
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
   return FirebaseAuth.instance;
 });
 
-// User ID provider
-final userIdProvider = Provider<String>((ref) {
-  final user = ref.watch(firebaseAuthProvider).currentUser;
-  if (user == null) {
-    throw Exception('User not authenticated');
-  }
-  return user.uid;
+final userIdProvider = StreamProvider<String?>((ref) {
+  return ref
+      .watch(firebaseAuthProvider)
+      .authStateChanges()
+      .map((user) => user?.uid);
 });
 
-// Chat Notifier
 final chatNotifierProvider =
     StateNotifierProvider<ChatNotifier, AsyncValue<List<ChatMessage>>>((ref) {
+  final userId = ref.watch(userIdProvider).maybeWhen(
+        data: (uid) => uid,
+        orElse: () => null,
+      );
+
+  if (userId == null) {
+    return ChatNotifier(
+      getChatMessagesUseCase: ref.watch(getChatMessagesUseCaseProvider),
+      sendChatMessageUseCase: ref.watch(sendChatMessageUseCaseProvider),
+      userId: '',
+    )..clearState(); // Call clearState() if no user ID is found
+  }
+
   return ChatNotifier(
     getChatMessagesUseCase: ref.watch(getChatMessagesUseCaseProvider),
     sendChatMessageUseCase: ref.watch(sendChatMessageUseCaseProvider),
-    userId: ref.watch(userIdProvider),
+    userId: userId,
   );
 });
 
-// Image Notifier
-// Image Notifier
 final imageNotifierProvider =
     StateNotifierProvider<ImageNotifier, AsyncValue<ImageEntity?>>((ref) {
+  final userId = ref.watch(userIdProvider).maybeWhen(
+        data: (uid) => uid,
+        orElse: () => null,
+      );
+
+  if (userId == null) {
+    return ImageNotifier(
+      generateImageUseCase: ref.watch(generateImageUseCaseProvider),
+      imageDataSource: ref.watch(imageDataSourceProvider),
+      getImagesUseCase: ref.watch(getImagesUseCaseProvider),
+      userId: '',
+    )..clearState();
+  }
+
   return ImageNotifier(
     generateImageUseCase: ref.watch(generateImageUseCaseProvider),
-    imageDataSource:
-        ref.watch(imageDataSourceProvider), // Add the image data source
-    userId: ref.watch(userIdProvider),
+    imageDataSource: ref.watch(imageDataSourceProvider),
+    getImagesUseCase: ref.watch(getImagesUseCaseProvider),
+    userId: userId,
   );
 });

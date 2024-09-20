@@ -1,6 +1,14 @@
+import 'package:dartz/dartz.dart';
+
+import '../../core/errors/failures.dart';
 import '../entities/chat_message.dart';
 
 abstract class ChatRepository {
-  Stream<List<ChatMessage>> getChatMessages(String userId);
-  Future<void> sendChatMessage(ChatMessage message, String userId);
+  Stream<Either<Failure, List<ChatMessage>>> getChatMessages(
+    String userId,
+  ); // Use Either<Failure, List<ChatMessage>>
+  Future<Either<Failure, void>> sendChatMessage(
+    ChatMessage message,
+    String userId,
+  );
 }

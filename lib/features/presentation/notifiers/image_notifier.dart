@@ -1,34 +1,26 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/errors/failures.dart';
 import '../../data/datasources/firebase_image_datasource.dart';
 import '../../data/datasources/remote/image_service.dart';
 import '../../domain/entities/image_entity.dart';
 import '../../domain/usecases/generate_images.dart';
+import '../../domain/usecases/get_images.dart';
 
 class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
   final GenerateImage generateImageUseCase;
   final FirebaseImageDataSource imageDataSource;
+  final GetImages getImagesUseCase;
   final String userId;
 
   ImageNotifier({
     required this.generateImageUseCase,
     required this.imageDataSource,
+    required this.getImagesUseCase,
     required this.userId,
   }) : super(const AsyncLoading()) {
     _loadLastImage();
-  }
-
-  void loadDataForUser(String userId) {
-    state = const AsyncLoading();
-    imageDataSource.getLastImage(userId).listen((image) {
-      if (image != null) {
-        state = AsyncData(image);
-      } else {
-        state = const AsyncData(null);
-      }
-    }, onError: (e) {
-      state = AsyncError(e, StackTrace.current);
-    });
   }
 
   void clearState() {
@@ -36,18 +28,33 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
   }
 
   void _loadLastImage() {
-    imageDataSource.getLastImage(userId).listen((image) {
-      if (image != null) {
-        state = AsyncData(image);
-      } else {
-        state = const AsyncData(null);
-      }
-    }, onError: (e) {
-      state = AsyncError(e, StackTrace.current);
+    if (userId.isEmpty) {
+      state = const AsyncData(null);
+      return;
+    }
+
+    getImagesUseCase(userId).listen(
+        (Either<Failure, List<ImageEntity>> result) {
+      result.fold(
+        (failure) {
+          state = AsyncError(failure.message, StackTrace.current);
+        },
+        (images) {
+          if (images.isNotEmpty) {
+            state = AsyncData(images.first);
+          } else {
+            state = const AsyncData(null);
+          }
+        },
+      );
+    }, onError: (e, stack) {
+      state = AsyncError(e, stack);
     });
   }
 
   Future<void> generateImage(String prompt) async {
+    if (userId.isEmpty) return;
+
     state = const AsyncLoading();
 
     try {
@@ -60,14 +67,21 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
           timestamp: DateTime.now(),
         );
 
-        await generateImageUseCase(image, userId);
-
-        state = AsyncData(image);
+        final Either<Failure, void> result =
+            await generateImageUseCase(image, userId);
+        result.fold(
+          (failure) {
+            state = AsyncError(failure.message, StackTrace.current);
+          },
+          (_) {
+            state = AsyncData(image);
+          },
+        );
       } else {
-        state = AsyncError(Exception('No images found'), StackTrace.current);
+        state = AsyncError('No images found', StackTrace.current);
       }
-    } catch (e) {
-      state = AsyncError(e, StackTrace.current);
+    } catch (e, stackTrace) {
+      state = AsyncError(e, stackTrace);
     }
   }
 }

@@ -1,6 +1,9 @@
+import 'package:dartz/dartz.dart';
+
+import '../../core/errors/failures.dart';
 import '../entities/image_entity.dart';
 
 abstract class ImageRepository {
-  Stream<List<ImageEntity>> getImages(String userId);
-  Future<void> addImage(ImageEntity image, String userId);
+  Stream<Either<Failure, List<ImageEntity>>> getImages(String userId);
+  Future<Either<Failure, void>> addImage(ImageEntity image, String userId);
 }

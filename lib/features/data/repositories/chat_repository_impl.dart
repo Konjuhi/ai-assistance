@@ -1,4 +1,7 @@
-import '../../core/errors/exceptions.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../core/errors/app_exceptions.dart';
+import '../../core/errors/failures.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/firebase_chat_datasource.dart';
@@ -10,7 +13,8 @@ class ChatRepositoryImpl implements ChatRepository {
   ChatRepositoryImpl(this.dataSource);
 
   @override
-  Future<void> sendChatMessage(ChatMessage message, String userId) async {
+  Future<Either<Failure, void>> sendChatMessage(
+      ChatMessage message, String userId) async {
     try {
       final messageModel = ChatMessageModel(
         sender: message.sender,
@@ -19,28 +23,32 @@ class ChatRepositoryImpl implements ChatRepository {
       );
 
       await dataSource.sendChatMessage(messageModel, userId);
-    } on ServerExceptionn catch (e) {
-      rethrow;
-    } catch (e) {
-      throw ServerExceptionn(message: e.toString());
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, stackTrace: e.stackTrace));
+    } catch (e, stackTrace) {
+      return Left(ServerFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
   @override
-  Stream<List<ChatMessage>> getChatMessages(String userId) async* {
+  Stream<Either<Failure, List<ChatMessage>>> getChatMessages(
+      String userId) async* {
     try {
       final stream = dataSource.getChatMessages(userId);
-      yield* stream.map((messageModels) => messageModels
-          .map((model) => ChatMessage(
-                sender: model.sender,
-                message: model.message,
-                timestamp: model.timestamp,
-              ))
-          .toList());
-    } on ServerExceptionn catch (e) {
-      rethrow;
-    } catch (e) {
-      throw ServerExceptionn(message: e.toString());
+      yield* stream.map(
+        (messageModels) => Right(messageModels.map((model) {
+          return ChatMessage(
+            sender: model.sender,
+            message: model.message,
+            timestamp: model.timestamp,
+          );
+        }).toList()),
+      );
+    } on ServerException catch (e) {
+      yield Left(ServerFailure(message: e.message, stackTrace: e.stackTrace));
+    } catch (e, stackTrace) {
+      yield Left(ServerFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 }

@@ -9,7 +9,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final GetChatMessages getChatMessagesUseCase;
   final SendChatMessage sendChatMessageUseCase;
   final String userId;
-  bool isSendingMessage = false;
+  bool isSendingMessage = false; // Add this
 
   ChatNotifier({
     required this.getChatMessagesUseCase,
@@ -19,28 +19,34 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     _loadMessages();
   }
 
-  void loadDataForUser(String userId) {
-    state = const AsyncLoading();
-    getChatMessagesUseCase(userId).listen((messages) {
-      state = AsyncData(messages);
-    }, onError: (e) {
-      state = AsyncError(e, StackTrace.current);
-    });
-  }
-
+  // Add clearState to reset the state
   void clearState() {
     state = const AsyncData([]);
   }
 
   void _loadMessages() {
-    getChatMessagesUseCase(userId).listen((messages) {
-      state = AsyncData(messages);
+    if (userId.isEmpty) {
+      state = const AsyncData([]);
+      return;
+    }
+
+    getChatMessagesUseCase(userId).listen((result) {
+      result.fold(
+        (failure) {
+          state = AsyncError(failure.message, StackTrace.current);
+        },
+        (messages) {
+          state = AsyncData(messages);
+        },
+      );
     }, onError: (e, stack) {
       state = AsyncError(e, stack);
     });
   }
 
   Future<void> sendMessageAndFetchResponse(String question) async {
+    if (userId.isEmpty) return;
+
     isSendingMessage = true;
     state = const AsyncLoading();
 
@@ -64,9 +70,10 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
         ),
         userId,
       );
+
       _loadMessages();
-    } catch (e) {
-      state = AsyncError(e, StackTrace.current);
+    } catch (e, stack) {
+      state = AsyncError(e, stack);
     } finally {
       isSendingMessage = false;
     }
