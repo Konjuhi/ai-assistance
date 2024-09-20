@@ -25,31 +25,44 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
 
   void clearState() {
     state = const AsyncData(null);
+    print("State cleared, image set to null.");
   }
 
   void _loadLastImage() {
     if (userId.isEmpty) {
       state = const AsyncData(null);
+      print("User ID is empty, no image to load.");
       return;
     }
 
+    print("Loading last image for user: $userId");
+
     getImagesUseCase(userId).listen(
-        (Either<Failure, List<ImageEntity>> result) {
-      result.fold(
-        (failure) {
-          state = AsyncError(failure.message, StackTrace.current);
-        },
-        (images) {
-          if (images.isNotEmpty) {
-            state = AsyncData(images.first);
-          } else {
-            state = const AsyncData(null);
-          }
-        },
-      );
-    }, onError: (e, stack) {
-      state = AsyncError(e, stack);
-    });
+      (Either<Failure, List<ImageEntity>> result) {
+        result.fold(
+          (failure) {
+            state = AsyncError(failure.message, StackTrace.current);
+            print("Error loading images: ${failure.message}");
+          },
+          (images) {
+            // Sort images by timestamp to get the most recent one
+            images.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+            if (images.isNotEmpty) {
+              print("Loaded image: ${images.first.imageUrl}");
+              state = AsyncData(images.first);
+            } else {
+              print("No images found for user: $userId");
+              state = const AsyncData(null);
+            }
+          },
+        );
+      },
+      onError: (e, stack) {
+        print("Error loading last image: $e");
+        state = AsyncError(e, stack);
+      },
+    );
   }
 
   Future<void> generateImage(String prompt) async {
@@ -69,12 +82,13 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
 
         final Either<Failure, void> result =
             await generateImageUseCase(image, userId);
+
         result.fold(
           (failure) {
             state = AsyncError(failure.message, StackTrace.current);
           },
           (_) {
-            state = AsyncData(image);
+            state = AsyncData(image); // Update state with the new image
           },
         );
       } else {

@@ -46,12 +46,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: 'image-generation',
-            builder: (context, state) => const ImageGenerationScreen(),
+            builder: (context, state) => ImageGenerationScreen(),
           ),
           GoRoute(
             path: 'profile',
             builder: (context, state) => ProfileScreen(
-              appBar: AppBar(title: const Text('Profile'),),
+              appBar: AppBar(
+                title: const Text('Profile'),
+              ),
               providers: authProviders,
               actions: [
                 SignedOutAction((context) {
