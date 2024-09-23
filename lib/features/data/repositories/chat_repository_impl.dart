@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 
-import '../../core/errors/app_exceptions.dart';
-import '../../core/errors/failures.dart';
+import '../../common/errors/app_exceptions.dart';
+import '../../common/errors/failures.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/firebase_chat_datasource.dart';

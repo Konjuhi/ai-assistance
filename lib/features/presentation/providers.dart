@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/providers.dart';
 import '../domain/entities/chat_message.dart';
 import '../domain/entities/image_entity.dart';
 import '../domain/providers.dart';
@@ -51,7 +50,6 @@ final imageNotifierProvider =
   if (userId == null) {
     return ImageNotifier(
       generateImageUseCase: ref.watch(generateImageUseCaseProvider),
-      imageDataSource: ref.watch(imageDataSourceProvider),
       getImagesUseCase: ref.watch(getImagesUseCaseProvider),
       userId: '',
     )..clearState();
@@ -59,7 +57,6 @@ final imageNotifierProvider =
 
   return ImageNotifier(
     generateImageUseCase: ref.watch(generateImageUseCaseProvider),
-    imageDataSource: ref.watch(imageDataSourceProvider),
     getImagesUseCase: ref.watch(getImagesUseCaseProvider),
     userId: userId,
   );

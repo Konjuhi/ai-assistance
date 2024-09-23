@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
-import '../../core/errors/failures.dart';
+import '../../common/errors/app_exceptions.dart';
+import '../../common/errors/failures.dart';
 import '../../domain/entities/image_entity.dart';
 import '../../domain/repositories/image_repository.dart';
 import '../datasources/firebase_image_datasource.dart';
@@ -15,15 +16,21 @@ class ImageRepositoryImpl implements ImageRepository {
   Stream<Either<Failure, List<ImageEntity>>> getImages(String userId) async* {
     try {
       final stream = dataSource.getImages(userId);
-      yield* stream.map((imageModels) => Right(imageModels
-          .map((model) => ImageEntity(
-                imageUrl: model.imageUrl,
-                prompt: model.prompt,
-                timestamp: model.timestamp,
-              ))
-          .toList()));
-    } catch (e) {
-      yield Left(ServerFailure(message: e.toString()));
+      yield* stream.map(
+        (imageModels) => Right(
+          imageModels
+              .map((model) => ImageEntity(
+                    imageUrl: model.imageUrl,
+                    prompt: model.prompt,
+                    timestamp: model.timestamp,
+                  ))
+              .toList(),
+        ),
+      );
+    } on AppException catch (e) {
+      yield Left(ServerFailure(message: e.message, stackTrace: e.stackTrace));
+    } catch (e, stackTrace) {
+      yield Left(ServerFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 
@@ -40,8 +47,10 @@ class ImageRepositoryImpl implements ImageRepository {
         userId,
       );
       return const Right(null);
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
+    } on AppException catch (e) {
+      return Left(ServerFailure(message: e.message, stackTrace: e.stackTrace));
+    } catch (e, stackTrace) {
+      return Left(ServerFailure(message: e.toString(), stackTrace: stackTrace));
     }
   }
 }

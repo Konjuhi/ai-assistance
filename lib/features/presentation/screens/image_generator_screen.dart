@@ -24,18 +24,13 @@ class ImageGenerationScreen extends ConsumerWidget {
                   if (image == null) {
                     return const Center(child: Text('No image generated yet'));
                   }
-
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Image.network(image.imageUrl),
                   );
                 },
-                loading: () {
-                  return const Center(child: CircularProgressIndicator());
-                },
-                error: (e, stack) {
-                  return Center(child: Text('Error: $e'));
-                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, stack) => Center(child: Text('Error: $e')),
               ),
             ),
             Padding(
@@ -50,14 +45,14 @@ class ImageGenerationScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () async {
                 final prompt = controller.text.trim();
-                if (prompt.isEmpty) {
-                  return;
-                }
-
+                if (prompt.isEmpty) return;
                 await imageNotifier.generateImage(prompt);
               },
               child: const Text('Generate Image'),
             ),
+            const SizedBox(
+              height: 20,
+            )
           ],
         ),
       ),

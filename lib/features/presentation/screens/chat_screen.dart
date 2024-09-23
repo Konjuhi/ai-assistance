@@ -13,6 +13,7 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _initialLoadComplete = false;
 
   @override
   void dispose() {
@@ -21,22 +22,43 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     super.dispose();
   }
 
-  void _scrollToBottom({bool smooth = false}) {
+  void _jumpToBottom() {
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      _scrollController.jumpTo(maxScroll);
+    }
+  }
+
+  void _scrollIfNecessary() {
     if (_scrollController.hasClients) {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.offset;
-      if (maxScroll > currentScroll) {
-        if (smooth) {
-          _scrollController.animateTo(
-            maxScroll,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        } else {
-          _scrollController.jumpTo(maxScroll);
-        }
+      final distanceFromBottom = maxScroll - currentScroll;
+
+      if (distanceFromBottom > 100) {
+        _scrollController.animateTo(
+          maxScroll,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -45,17 +67,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatNotifier = ref.read(chatNotifierProvider.notifier);
     final isSendingMessage = chatNotifier.isSendingMessage;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('AI Chatbot')),
-      body: SafeArea(
-        child: Column(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(title: const Text('AI Chatbot')),
+        body: Column(
           children: [
+            if (isSendingMessage) const LinearProgressIndicator(),
             Expanded(
               child: chatState.when(
                 data: (messages) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    _scrollToBottom();
+                    if (!_initialLoadComplete) {
+                      _jumpToBottom();
+                      _initialLoadComplete = true;
+                    } else {
+                      _scrollIfNecessary();
+                    }
                   });
+
                   if (messages.isEmpty) {
                     return const Center(child: Text('No chat history.'));
                   }
@@ -80,7 +109,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 error: (e, stack) => Center(child: Text('Error: $e')),
               ),
             ),
-            if (isSendingMessage) const LinearProgressIndicator(),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -94,10 +122,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       final question = _controller.text.trim();
                       if (question.isEmpty) return;
                       _controller.clear();
-                      await chatNotifier.sendMessageAndFetchResponse(question);
-                      _scrollToBottom(smooth: true);
+
+                      final error = await chatNotifier
+                          .sendMessageAndFetchResponse(question);
+
+                      if (error != null) {
+                        _showErrorDialog(error);
+                      } else {
+                        _scrollIfNecessary();
+                      }
                     },
-                  ),
+                  )
                 ],
               ),
             ),

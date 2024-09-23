@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 
-import '../../core/errors/failures.dart';
+import '../../common/errors/failures.dart';
 import '../entities/image_entity.dart';
 import '../repositories/image_repository.dart';
 

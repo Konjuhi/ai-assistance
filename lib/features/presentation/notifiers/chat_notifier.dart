@@ -9,7 +9,8 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final GetChatMessages getChatMessagesUseCase;
   final SendChatMessage sendChatMessageUseCase;
   final String userId;
-  bool isSendingMessage = false; // Add this
+
+  bool isSendingMessage = false;
 
   ChatNotifier({
     required this.getChatMessagesUseCase,
@@ -19,18 +20,13 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     _loadMessages();
   }
 
-  // Add clearState to reset the state
   void clearState() {
     state = const AsyncData([]);
   }
 
   void _loadMessages() {
-    if (userId.isEmpty) {
-      state = const AsyncData([]);
-      return;
-    }
-
     getChatMessagesUseCase(userId).listen((result) {
+      if (!mounted) return;
       result.fold(
         (failure) {
           state = AsyncError(failure.message, StackTrace.current);
@@ -40,40 +36,39 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
         },
       );
     }, onError: (e, stack) {
+      if (!mounted) return;
       state = AsyncError(e, stack);
     });
   }
 
-  Future<void> sendMessageAndFetchResponse(String question) async {
-    if (userId.isEmpty) return;
-
-    isSendingMessage = true;
-    state = const AsyncLoading();
+  Future<String?> sendMessageAndFetchResponse(String message) async {
+    if (isSendingMessage) return null;
 
     try {
+      isSendingMessage = true;
       await sendChatMessageUseCase(
         ChatMessage(
           sender: 'You',
-          message: question,
+          message: message,
           timestamp: DateTime.now(),
         ),
         userId,
       );
 
-      final response = await AIService.getAnswer(question);
-
+      final response = await AIService.getAnswer(message);
+      if (!mounted) return null; // Check if widget is still mounted
       await sendChatMessageUseCase(
         ChatMessage(
           sender: 'Bot',
-          message: response,
+          message: response.fold((l) => l.message, (r) => r),
           timestamp: DateTime.now(),
         ),
         userId,
       );
-
       _loadMessages();
-    } catch (e, stack) {
-      state = AsyncError(e, stack);
+      return null;
+    } catch (e) {
+      return e.toString();
     } finally {
       isSendingMessage = false;
     }

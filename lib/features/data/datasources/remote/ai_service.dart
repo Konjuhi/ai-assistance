@@ -1,11 +1,14 @@
 import 'dart:developer';
 
+import 'package:dartz/dartz.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+
+import '../../../common/errors/failures.dart';
 
 class AIService {
   static const String apiKey = 'AIzaSyBmOrD6Ft2GtLwFV1_RYRsZEfPX74WWJJQ';
 
-  static Future<String> getAnswer(String question) async {
+  static Future<Either<Failure, String>> getAnswer(String question) async {
     try {
       log('API Key: $apiKey');
 
@@ -28,10 +31,25 @@ class AIService {
       String answer = res.text!;
       log('Response: $answer');
 
-      return answer;
-    } catch (e) {
+      return Right(answer);
+    } catch (e, stackTrace) {
       log('getAnswer Error: $e');
-      return 'Something went wrong (Try again later)';
+
+      if (e.toString().contains('UnsupportedUserLocation')) {
+        return Left(
+          ServerFailure(
+            message: "Gemini isn't available in your country",
+            stackTrace: stackTrace,
+          ),
+        );
+      } else {
+        return Left(
+          ServerFailure(
+            message: 'Something went wrong',
+            stackTrace: stackTrace,
+          ),
+        );
+      }
     }
   }
 }

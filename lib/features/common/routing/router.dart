@@ -1,18 +1,24 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'features/presentation/screens/chat_screen.dart';
-import 'features/presentation/screens/home_screen.dart';
-import 'features/presentation/screens/image_generator_screen.dart';
-import 'firebase_providers.dart';
+import '../../../firebase_providers.dart';
+import '../../presentation/screens/chat_screen.dart';
+import '../../presentation/screens/home_screen.dart';
+import '../../presentation/screens/image_generator_screen.dart';
+import '../errors/firebase_auth_exception.dart';
 
 class AuthStateChangeNotifier extends ChangeNotifier {
   AuthStateChangeNotifier() {
     FirebaseAuth.instance.authStateChanges().listen((user) {
       notifyListeners();
+    }, onError: (error) {
+      final exception = mapFirebaseAuthException(error);
+      log('Auth Error: ${exception.message}');
     });
   }
 }
@@ -46,7 +52,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: 'image-generation',
-            builder: (context, state) => ImageGenerationScreen(),
+            builder: (context, state) => const ImageGenerationScreen(),
           ),
           GoRoute(
             path: 'profile',
