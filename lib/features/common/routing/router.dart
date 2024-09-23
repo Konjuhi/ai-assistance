@@ -10,7 +10,7 @@ import '../../../firebase_providers.dart';
 import '../../presentation/screens/chat_screen.dart';
 import '../../presentation/screens/home_screen.dart';
 import '../../presentation/screens/image_generator_screen.dart';
-import '../errors/firebase_auth_exception.dart';
+import '../errors/app_firebase_exception.dart';
 
 class AuthStateChangeNotifier extends ChangeNotifier {
   AuthStateChangeNotifier() {

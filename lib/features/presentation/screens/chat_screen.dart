@@ -67,10 +67,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatNotifier = ref.read(chatNotifierProvider.notifier);
     final isSendingMessage = chatNotifier.isSendingMessage;
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(title: const Text('AI Chatbot')),
-        body: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('AI Chatbot')),
+      body: SafeArea(
+        child: Column(
           children: [
             if (isSendingMessage) const LinearProgressIndicator(),
             Expanded(
