@@ -46,6 +46,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
 
     try {
       isSendingMessage = true;
+
       await sendChatMessageUseCase(
         ChatMessage(
           sender: 'You',
@@ -56,17 +57,25 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
       );
 
       final response = await AIService.getAnswer(message);
-      if (!mounted) return null; // Check if widget is still mounted
+      if (!mounted) return null; //
+
+      final responseMessage = response.fold(
+        (failure) => failure.message,
+        (success) => success,
+      );
+
       await sendChatMessageUseCase(
         ChatMessage(
           sender: 'Bot',
-          message: response.fold((l) => l.message, (r) => r),
+          message: responseMessage,
           timestamp: DateTime.now(),
         ),
         userId,
       );
+
       _loadMessages();
-      return null;
+
+      return response.isLeft() ? responseMessage : null;
     } catch (e) {
       return e.toString();
     } finally {

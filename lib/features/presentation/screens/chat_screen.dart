@@ -10,16 +10,35 @@ class ChatScreen extends ConsumerStatefulWidget {
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen>
+    with WidgetsBindingObserver {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _initialLoadComplete = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (_scrollController.hasClients) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    }
   }
 
   void _jumpToBottom() {
@@ -29,36 +48,33 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  void _scrollIfNecessary() {
+  void _scrollToBottom() {
     if (_scrollController.hasClients) {
       final maxScroll = _scrollController.position.maxScrollExtent;
-      final currentScroll = _scrollController.offset;
-      final distanceFromBottom = maxScroll - currentScroll;
-
-      if (distanceFromBottom > 100) {
-        _scrollController.animateTo(
-          maxScroll,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
+      _scrollController.animateTo(
+        maxScroll,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
   void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -68,6 +84,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final isSendingMessage = chatNotifier.isSendingMessage;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: const Text('AI Chatbot')),
       body: SafeArea(
         child: Column(
@@ -81,7 +98,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       _jumpToBottom();
                       _initialLoadComplete = true;
                     } else {
-                      _scrollIfNecessary();
+                      _scrollToBottom();
                     }
                   });
 
@@ -89,16 +106,39 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     return const Center(child: Text('No chat history.'));
                   }
                   return ListView.builder(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
                     controller: _scrollController,
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      return ListTile(
-                        leading: Icon(
-                          message.sender == 'Bot' ? Icons.laptop : Icons.person,
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 8.0),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(
+                                message.sender == 'Bot'
+                                    ? Icons.laptop
+                                    : Icons.person,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    message.message,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        title: Text(message.message),
-                        subtitle: Text(message.sender),
                       );
                     },
                   );
@@ -114,7 +154,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(controller: _controller),
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: 'Type your message...',
+                      ),
+                      onSubmitted: (value) async {
+                        if (value.isEmpty) return;
+                        _controller.clear();
+
+                        final error = await chatNotifier
+                            .sendMessageAndFetchResponse(value);
+
+                        if (error != null && mounted) {
+                          _showErrorDialog(error);
+                        } else if (mounted) {
+                          _scrollToBottom();
+                        }
+                      },
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.send),
@@ -126,10 +184,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       final error = await chatNotifier
                           .sendMessageAndFetchResponse(question);
 
-                      if (error != null) {
+                      if (error != null && mounted) {
                         _showErrorDialog(error);
-                      } else {
-                        _scrollIfNecessary();
+                      } else if (mounted) {
+                        _scrollToBottom();
                       }
                     },
                   )
