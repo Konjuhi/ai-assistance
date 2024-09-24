@@ -115,29 +115,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       return Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 8.0),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Icon(
-                                message.sender == 'Bot'
-                                    ? Icons.laptop
-                                    : Icons.person,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Text(
-                                    message.message,
-                                    textAlign: TextAlign.left,
-                                  ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Icon(
+                              message.sender == 'Bot'
+                                  ? Icons.laptop
+                                  : Icons.person,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.topLeft,
+                                child: Text(
+                                  message.message,
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -156,9 +154,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      decoration: const InputDecoration(
-                        hintText: 'Type your message...',
-                      ),
                       onSubmitted: (value) async {
                         if (value.isEmpty) return;
                         _controller.clear();
