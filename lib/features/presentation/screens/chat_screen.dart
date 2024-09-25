@@ -4,7 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key});
+  final String chatId;
+
+  const ChatScreen({
+    required this.chatId,
+    super.key,
+  });
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -79,8 +84,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
   @override
   Widget build(BuildContext context) {
-    final chatState = ref.watch(chatNotifierProvider);
-    final chatNotifier = ref.read(chatNotifierProvider.notifier);
+    final chatState = ref.watch(chatNotifierProvider(widget.chatId));
+    final chatNotifier = ref.read(chatNotifierProvider(widget.chatId).notifier);
     final isSendingMessage = chatNotifier.isSendingMessage;
 
     return Scaffold(
@@ -154,6 +159,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                   Expanded(
                     child: TextField(
                       controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: 'Type your message...',
+                      ),
                       onSubmitted: (value) async {
                         if (value.isEmpty) return;
                         _controller.clear();

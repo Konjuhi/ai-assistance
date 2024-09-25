@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 
-import '../../common/errors/app_exceptions.dart';
 import '../../common/errors/failures.dart';
 import '../../domain/entities/chat_message.dart';
 import '../../domain/repositories/chat_repository.dart';
@@ -14,7 +13,7 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, void>> sendChatMessage(
-      ChatMessage message, String userId) async {
+      ChatMessage message, String chatId, String userId) async {
     try {
       final messageModel = ChatMessageModel(
         sender: message.sender,
@@ -22,10 +21,8 @@ class ChatRepositoryImpl implements ChatRepository {
         timestamp: message.timestamp,
       );
 
-      await dataSource.sendChatMessage(messageModel, userId);
+      await dataSource.sendChatMessage(messageModel, chatId, userId);
       return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, stackTrace: e.stackTrace));
     } catch (e, stackTrace) {
       return Left(ServerFailure(message: e.toString(), stackTrace: stackTrace));
     }
@@ -33,9 +30,9 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Stream<Either<Failure, List<ChatMessage>>> getChatMessages(
-      String userId) async* {
+      String chatId, String userId) async* {
     try {
-      final stream = dataSource.getChatMessages(userId);
+      final stream = dataSource.getChatMessages(chatId, userId);
       yield* stream.map(
         (messageModels) => Right(messageModels.map((model) {
           return ChatMessage(
@@ -45,10 +42,13 @@ class ChatRepositoryImpl implements ChatRepository {
           );
         }).toList()),
       );
-    } on ServerException catch (e) {
-      yield Left(ServerFailure(message: e.message, stackTrace: e.stackTrace));
     } catch (e, stackTrace) {
       yield Left(ServerFailure(message: e.toString(), stackTrace: stackTrace));
     }
+  }
+
+  @override
+  Stream<List<String>> getAllChats(String userId) {
+    return dataSource.getAllChats(userId);
   }
 }

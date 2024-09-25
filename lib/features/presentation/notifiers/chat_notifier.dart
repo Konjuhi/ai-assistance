@@ -9,6 +9,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final GetChatMessages getChatMessagesUseCase;
   final SendChatMessage sendChatMessageUseCase;
   final String userId;
+  final String chatId;
 
   bool isSendingMessage = false;
 
@@ -16,6 +17,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     required this.getChatMessagesUseCase,
     required this.sendChatMessageUseCase,
     required this.userId,
+    required this.chatId,
   }) : super(const AsyncLoading()) {
     _loadMessages();
   }
@@ -25,7 +27,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   }
 
   void _loadMessages() {
-    getChatMessagesUseCase(userId).listen((result) {
+    getChatMessagesUseCase(chatId, userId).listen((result) {
       if (!mounted) return;
       result.fold(
         (failure) {
@@ -53,11 +55,12 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
           message: message,
           timestamp: DateTime.now(),
         ),
+        chatId,
         userId,
       );
 
       final response = await AIService.getAnswer(message);
-      if (!mounted) return null; //
+      if (!mounted) return null;
 
       final responseMessage = response.fold(
         (failure) => failure.message,
@@ -70,6 +73,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
           message: responseMessage,
           timestamp: DateTime.now(),
         ),
+        chatId,
         userId,
       );
 

@@ -47,8 +47,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const HomeScreen(),
         routes: [
           GoRoute(
-            path: 'chat',
-            builder: (context, state) => const ChatScreen(),
+            path: 'chat/:chatId',
+            builder: (context, state) {
+              final chatId = state.params['chatId'];
+              return ChatScreen(chatId: chatId!);
+            },
           ),
           GoRoute(
             path: 'image-generation',
