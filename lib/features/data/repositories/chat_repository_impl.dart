@@ -48,7 +48,18 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Stream<List<String>> getAllChats(String userId) {
+  Stream<List<Map<String, dynamic>>> getAllChats(String userId) {
     return dataSource.getAllChats(userId);
+  }
+
+  @override
+  Future<void> createChatIfNotExists(
+      String chatId, String userId, String chatName) async {
+    await dataSource.createChatIfNotExists(chatId, userId, chatName);
+  }
+
+  @override
+  Future<void> deleteChat(String chatId, String userId) async {
+    await dataSource.deleteChat(chatId, userId);
   }
 }

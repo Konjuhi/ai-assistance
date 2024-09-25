@@ -67,7 +67,7 @@ final imageNotifierProvider =
     userId: userId,
   );
 });
-final chatsProvider = StreamProvider<List<String>>((ref) {
+final chatsProvider = StreamProvider<List<Map<String, dynamic>>>((ref) {
   final userId = ref.watch(userIdProvider).maybeWhen(
         data: (uid) => uid,
         orElse: () => null,

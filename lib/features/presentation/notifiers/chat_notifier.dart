@@ -5,6 +5,8 @@ import '../../domain/entities/chat_message.dart';
 import '../../domain/usecases/get_chat_messages.dart';
 import '../../domain/usecases/send_chat_messages.dart';
 
+final loadingProvider = StateProvider<bool>((ref) => false);
+
 class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final GetChatMessages getChatMessagesUseCase;
   final SendChatMessage sendChatMessageUseCase;

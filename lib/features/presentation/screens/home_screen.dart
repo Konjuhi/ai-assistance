@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/providers.dart';
+import '../notifiers/chat_notifier.dart';
 import '../notifiers/home_notifier.dart';
 import '../providers.dart';
 
@@ -12,10 +13,51 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    Future<String?> showChatNameDialog(BuildContext context, WidgetRef ref) {
+      final TextEditingController controller = TextEditingController();
+
+      return showDialog<String>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Enter Chat Name'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(hintText: 'Chat name'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              Consumer(
+                builder: (context, ref, _) {
+                  final isLoading = ref.watch(loadingProvider);
+
+                  return isLoading
+                      ? const CircularProgressIndicator()
+                      : TextButton(
+                          onPressed: () async {
+                            final chatName = controller.text.trim();
+                            if (chatName.isNotEmpty) {
+                              ref.read(loadingProvider.notifier).state = true;
+
+                              Navigator.of(context).pop(chatName);
+                            }
+                          },
+                          child: const Text('Create'),
+                        );
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     final options = ref.watch(homeProvider);
     final userIdAsyncValue = ref.watch(userIdProvider);
     final uuid = ref.read(uuidProvider);
-    final chatDataSource = ref.read(chatDataSourceProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,21 +72,32 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {
-              final userId = ref.read(userIdProvider).value;
-              if (userId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please log in to create a new chat.'),
-                  ),
-                );
-                return;
+              final chatName = await showChatNameDialog(context, ref);
+
+              if (chatName != null && chatName.isNotEmpty) {
+                final userId = ref.read(userIdProvider).value;
+                if (userId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please log in to create a new chat.'),
+                    ),
+                  );
+                  return;
+                }
+
+                final newChatId = uuid.v4();
+
+                try {
+                  await ref
+                      .read(chatRepositoryProvider)
+                      .createChatIfNotExists(newChatId, userId, chatName);
+                } finally {
+                  // Reset loading state to false
+                  ref.read(loadingProvider.notifier).state = false;
+                }
+
+                context.push('/chat/$newChatId');
               }
-
-              final newChatId = uuid.v4();
-
-              await chatDataSource.createChatIfNotExists(newChatId, userId);
-
-              context.push('/chat/$newChatId');
             },
           ),
         ],
@@ -64,14 +117,47 @@ class HomeScreen extends ConsumerWidget {
                       return ListView.builder(
                         itemCount: chats.length,
                         itemBuilder: (context, index) {
-                          final chatId = chats[index];
-                          return ListTile(
-                            title: Text('Chat $chatId'),
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pop(); // This closes the drawer
-                              context.push('/chat/$chatId');
+                          final chat = chats[index];
+                          final chatId = chat['chatId'];
+                          final chatName = chat['chatName'] ?? 'Chat $chatId';
+
+                          return Dismissible(
+                            key: Key(chatId),
+                            direction: DismissDirection.endToStart,
+                            // Swipe to delete
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child:
+                                  const Icon(Icons.delete, color: Colors.white),
+                            ),
+                            onDismissed: (direction) async {
+                              final userId = ref.read(userIdProvider).value;
+                              if (userId != null) {
+                                await ref
+                                    .read(chatRepositoryProvider)
+                                    .deleteChat(chatId, userId);
+                              }
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('$chatName deleted'),
+                                  action: SnackBarAction(
+                                    label: 'Undo',
+                                    onPressed: () async {},
+                                  ),
+                                ),
+                              );
                             },
+                            child: ListTile(
+                              title: Text(chatName),
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                context.push('/chat/$chatId');
+                              },
+                            ),
                           );
                         },
                       );

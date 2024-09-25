@@ -7,7 +7,7 @@ abstract class ChatRepository {
   Stream<Either<Failure, List<ChatMessage>>> getChatMessages(
     String chatId,
     String userId,
-  ); // Use chatId and userId
+  );
 
   Future<Either<Failure, void>> sendChatMessage(
     ChatMessage message,
@@ -15,5 +15,10 @@ abstract class ChatRepository {
     String userId,
   );
 
-  Stream<List<String>> getAllChats(String userId);
+  Stream<List<Map<String, dynamic>>> getAllChats(String userId);
+
+  Future<void> createChatIfNotExists(
+      String chatId, String userId, String chatName);
+
+  Future<void> deleteChat(String chatId, String userId);
 }

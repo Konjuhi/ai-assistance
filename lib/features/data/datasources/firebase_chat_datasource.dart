@@ -5,12 +5,15 @@ import '../models/chat_message_model.dart';
 abstract class ChatDataSource {
   Stream<List<ChatMessageModel>> getChatMessages(String chatId, String userId);
 
-  Future<void> createChatIfNotExists(String chatId, String userId);
+  Future<void> createChatIfNotExists(
+      String chatId, String userId, String chatName);
 
   Future<void> sendChatMessage(
       ChatMessageModel message, String chatId, String userId);
 
-  Stream<List<String>> getAllChats(String userId);
+  Stream<List<Map<String, dynamic>>> getAllChats(String userId);
+
+  Future<void> deleteChat(String chatId, String userId);
 }
 
 class FirebaseChatDataSource implements ChatDataSource {
@@ -19,7 +22,8 @@ class FirebaseChatDataSource implements ChatDataSource {
   FirebaseChatDataSource(this.firestore);
 
   @override
-  Future<void> createChatIfNotExists(String chatId, String userId) async {
+  Future<void> createChatIfNotExists(
+      String chatId, String userId, String chatName) async {
     final chatDoc = firestore
         .collection('users')
         .doc(userId)
@@ -32,6 +36,7 @@ class FirebaseChatDataSource implements ChatDataSource {
         'createdAt': FieldValue.serverTimestamp(),
         'chatId': chatId,
         'userId': userId,
+        'chatName': chatName,
       });
     }
   }
@@ -70,14 +75,37 @@ class FirebaseChatDataSource implements ChatDataSource {
   }
 
   @override
-  Stream<List<String>> getAllChats(String userId) {
+  Stream<List<Map<String, dynamic>>> getAllChats(String userId) {
     return firestore
         .collection('users')
         .doc(userId)
         .collection('chats')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => doc.id).toList();
+      return snapshot.docs.map((doc) {
+        return {
+          'chatId': doc.id,
+          'chatName': doc['chatName'],
+        };
+      }).toList();
     });
+  }
+
+  @override
+  Future<void> deleteChat(String chatId, String userId) async {
+    final chatDoc = firestore
+        .collection('users')
+        .doc(userId)
+        .collection('chats')
+        .doc(chatId);
+
+    // Remove all messages inside the chat
+    final messages = await chatDoc.collection('messages').get();
+    for (var doc in messages.docs) {
+      await doc.reference.delete();
+    }
+
+    // Remove the chat document
+    await chatDoc.delete();
   }
 }
