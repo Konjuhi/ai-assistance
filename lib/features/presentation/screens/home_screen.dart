@@ -3,8 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../data/providers.dart';
 import '../notifiers/chat_notifier.dart';
+import '../notifiers/create_chat_notifier.dart';
+import '../notifiers/delete_chat_notifier.dart';
 import '../notifiers/home_notifier.dart';
 import '../providers.dart';
 
@@ -89,11 +90,12 @@ class HomeScreen extends ConsumerWidget {
 
                 try {
                   await ref
-                      .read(chatRepositoryProvider)
-                      .createChatIfNotExists(newChatId, userId, chatName);
-                } finally {
-                  // Reset loading state to false
-                  ref.read(loadingProvider.notifier).state = false;
+                      .read(createChatNotifierProvider.notifier)
+                      .createChat(newChatId, userId, chatName);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to create chat: $e')),
+                  );
                 }
 
                 context.push('/chat/$newChatId');
@@ -136,9 +138,18 @@ class HomeScreen extends ConsumerWidget {
                             onDismissed: (direction) async {
                               final userId = ref.read(userIdProvider).value;
                               if (userId != null) {
-                                await ref
-                                    .read(chatRepositoryProvider)
-                                    .deleteChat(chatId, userId);
+                                try {
+                                  // Use the deleteChatNotifier to delete the chat
+                                  await ref
+                                      .read(deleteChatNotifierProvider.notifier)
+                                      .deleteChat(chatId, userId);
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Failed to delete chat: $e')),
+                                  );
+                                }
                               }
 
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -146,11 +157,14 @@ class HomeScreen extends ConsumerWidget {
                                   content: Text('$chatName deleted'),
                                   action: SnackBarAction(
                                     label: 'Undo',
-                                    onPressed: () async {},
+                                    onPressed: () async {
+                                      // Optional: Handle undo functionality here if required
+                                    },
                                   ),
                                 ),
                               );
                             },
+
                             child: ListTile(
                               title: Text(chatName),
                               onTap: () {

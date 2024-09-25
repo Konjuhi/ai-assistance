@@ -99,13 +99,11 @@ class FirebaseChatDataSource implements ChatDataSource {
         .collection('chats')
         .doc(chatId);
 
-    // Remove all messages inside the chat
     final messages = await chatDoc.collection('messages').get();
     for (var doc in messages.docs) {
       await doc.reference.delete();
     }
 
-    // Remove the chat document
     await chatDoc.delete();
   }
 }

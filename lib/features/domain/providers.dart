@@ -1,3 +1,5 @@
+import 'package:ai_assistant/features/domain/usecases/create_chat.dart';
+import 'package:ai_assistant/features/domain/usecases/delete_chat.dart';
 import 'package:ai_assistant/features/domain/usecases/generate_images.dart';
 import 'package:ai_assistant/features/domain/usecases/get_images.dart';
 import 'package:ai_assistant/features/domain/usecases/send_chat_messages.dart';
@@ -20,4 +22,11 @@ final getImagesUseCaseProvider = Provider<GetImages>((ref) {
 
 final generateImageUseCaseProvider = Provider<GenerateImage>((ref) {
   return GenerateImage(ref.watch(imageRepositoryProvider));
+});
+
+final createChatUseCaseProvider = Provider<CreateChat>((ref) {
+  return CreateChat(ref.watch(chatRepositoryProvider));
+});
+final deleteChatUseCaseProvider = Provider<DeleteChat>((ref) {
+  return DeleteChat(ref.watch(chatRepositoryProvider));
 });
