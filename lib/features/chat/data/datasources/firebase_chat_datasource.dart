@@ -10,7 +10,7 @@ abstract class ChatDataSource {
   Future<void> sendChatMessage(
       ChatMessageModel message, String chatId, String userId);
 
-  Stream<List<Map<String, dynamic>>> getAllChats(String userId);
+  Stream<List<ChatModel>> getAllChats(String userId);
 
   Future<void> deleteChat(String chatId, String userId);
 }
@@ -74,7 +74,7 @@ class FirebaseChatDataSource implements ChatDataSource {
   }
 
   @override
-  Stream<List<Map<String, dynamic>>> getAllChats(String userId) {
+  Stream<List<ChatModel>> getAllChats(String userId) {
     return firestore
         .collection('users')
         .doc(userId)
@@ -82,10 +82,11 @@ class FirebaseChatDataSource implements ChatDataSource {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
-        return {
+        final data = doc.data();
+        return ChatModel.fromMap({
           'chatId': doc.id,
-          'chatName': doc['chatName'],
-        };
+          'chatName': data['chatName'],
+        });
       }).toList();
     });
   }

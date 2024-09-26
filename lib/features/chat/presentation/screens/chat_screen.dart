@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/presentation_providers.dart';
+import '../notifiers/chat_notifier.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   final String chatId;

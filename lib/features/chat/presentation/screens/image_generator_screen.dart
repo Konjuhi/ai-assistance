@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/presentation_providers.dart';
+import '../notifiers/image_notifier.dart';
 
 class ImageGenerationScreen extends ConsumerWidget {
   const ImageGenerationScreen({super.key});

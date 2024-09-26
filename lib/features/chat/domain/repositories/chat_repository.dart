@@ -1,4 +1,5 @@
 import 'package:ai_assistant/common/common.dart';
+import 'package:ai_assistant/features/chat/data/models/chat_model.dart';
 import 'package:ai_assistant/features/chat/domain/domain.dart';
 import 'package:dartz/dartz.dart';
 
@@ -14,7 +15,7 @@ abstract class ChatRepository {
     String userId,
   );
 
-  Stream<List<Map<String, dynamic>>> getAllChats(String userId);
+  Stream<List<ChatModel>> getAllChats(String userId);
 
   Future<void> createChatIfNotExists(
       String chatId, String userId, String chatName);

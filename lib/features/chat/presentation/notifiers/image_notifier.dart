@@ -5,6 +5,8 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/presentation_providers.dart';
+
 class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
   final GenerateImage generateImageUseCase;
   final GetImages getImagesUseCase;
@@ -106,3 +108,25 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
     }
   }
 }
+
+final imageNotifierProvider =
+    StateNotifierProvider<ImageNotifier, AsyncValue<ImageEntity?>>((ref) {
+  final userId = ref.watch(userIdProvider).maybeWhen(
+        data: (uid) => uid,
+        orElse: () => null,
+      );
+
+  if (userId == null) {
+    return ImageNotifier(
+      generateImageUseCase: ref.watch(generateImageUseCaseProvider),
+      getImagesUseCase: ref.watch(getImagesUseCaseProvider),
+      userId: '',
+    )..clearState();
+  }
+
+  return ImageNotifier(
+    generateImageUseCase: ref.watch(generateImageUseCaseProvider),
+    getImagesUseCase: ref.watch(getImagesUseCaseProvider),
+    userId: userId,
+  );
+});

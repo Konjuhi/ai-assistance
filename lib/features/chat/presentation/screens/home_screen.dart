@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../notifiers/chat_notifier.dart';
 import '../notifiers/create_chat_notifier.dart';
 import '../notifiers/delete_chat_notifier.dart';
+import '../notifiers/get_all_chats_notifier.dart';
 import '../providers/presentation_providers.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -120,73 +121,91 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(
                 height: 10,
               ),
+              // presentation/ui/home_screen.dart
               Expanded(
-                child: ref.watch(chatsProvider).when(
-                      data: (chats) {
-                        if (chats.isEmpty) {
+                child: ref.watch(userIdProvider).when(
+                      data: (userId) {
+                        if (userId == null) {
                           return const Center(
-                            child: Text('No chat history found'),
+                            child: Text('No user is logged in'),
                           );
                         }
-                        return ListView.builder(
-                          itemCount: chats.length,
-                          itemBuilder: (context, index) {
-                            final chat = chats[index];
-                            final chatId = chat['chatId'];
-                            final chatName = chat['chatName'] ?? 'Chat $chatId';
 
-                            return Dismissible(
-                              key: Key(chatId),
-                              direction: DismissDirection.endToStart,
-                              // Swipe to delete
-                              background: Container(
-                                color: Colors.red,
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20.0),
-                                child: const Icon(Icons.delete,
-                                    color: Colors.white),
-                              ),
-                              onDismissed: (direction) async {
-                                final userId = ref.read(userIdProvider).value;
-                                if (userId != null) {
-                                  try {
-                                    await ref
-                                        .read(
-                                            deleteChatNotifierProvider.notifier)
-                                        .deleteChat(chatId, userId);
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            Text('Failed to delete chat: $e'),
+                        return ref
+                            .watch(getAllChatsNotifierProvider(userId))
+                            .when(
+                              data: (chats) {
+                                if (chats.isEmpty) {
+                                  return const Center(
+                                    child: Text('No chat history found'),
+                                  );
+                                }
+                                return ListView.builder(
+                                  itemCount: chats.length,
+                                  itemBuilder: (context, index) {
+                                    final chat = chats[index];
+                                    final chatId = chat.chatId;
+                                    final chatName = chat.chatName;
+
+                                    return Dismissible(
+                                      key: Key(chatId),
+                                      direction: DismissDirection.endToStart,
+                                      background: Container(
+                                        color: Colors.red,
+                                        alignment: Alignment.centerRight,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20.0),
+                                        child: const Icon(Icons.delete,
+                                            color: Colors.white),
+                                      ),
+                                      onDismissed: (direction) async {
+                                        try {
+                                          await ref
+                                              .read(deleteChatNotifierProvider
+                                                  .notifier)
+                                              .deleteChat(chatId, userId);
+                                        } catch (e) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                  'Failed to delete chat: $e'),
+                                            ),
+                                          );
+                                        }
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text('$chatName deleted'),
+                                            action: SnackBarAction(
+                                              label: '',
+                                              onPressed: () async {
+                                                // Optional undo action
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: ListTile(
+                                        title: Text(chatName),
+                                        trailing:
+                                            const Icon(Icons.arrow_forward),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          context.push('/chat/$chatId');
+                                        },
                                       ),
                                     );
-                                  }
-                                }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('$chatName deleted'),
-                                    action: SnackBarAction(
-                                      label: '',
-                                      onPressed: () async {
-                                        // Optional
-                                      },
-                                    ),
-                                  ),
+                                  },
                                 );
                               },
-                              child: ListTile(
-                                title: Text(chatName),
-                                trailing: const Icon(Icons.arrow_forward),
-                                onTap: () {
-                                  Navigator.of(context).pop();
-                                  context.push('/chat/$chatId');
-                                },
+                              loading: () => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              error: (e, stack) => Center(
+                                child: Text('Error: $e'),
                               ),
                             );
-                          },
-                        );
                       },
                       loading: () => const Center(
                         child: CircularProgressIndicator(),
@@ -195,7 +214,7 @@ class HomeScreen extends ConsumerWidget {
                         child: Text('Error: $e'),
                       ),
                     ),
-              ),
+              )
             ],
           ),
         ),

@@ -24,3 +24,6 @@ final createChatUseCaseProvider = Provider<CreateChat>((ref) {
 final deleteChatUseCaseProvider = Provider<DeleteChat>((ref) {
   return DeleteChat(ref.watch(chatRepositoryProvider));
 });
+final getAllChatsUseCaseProvider = Provider<GetAllChats>((ref) {
+  return GetAllChats(ref.watch(chatRepositoryProvider));
+});

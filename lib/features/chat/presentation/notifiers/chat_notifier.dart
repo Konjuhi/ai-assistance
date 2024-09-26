@@ -2,7 +2,7 @@ import 'package:ai_assistant/features/chat/data/datasources/remote/ai_service.da
 import 'package:ai_assistant/features/chat/domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final loadingProvider = StateProvider<bool>((ref) => false);
+import '../providers/presentation_providers.dart';
 
 class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final GetChatMessages getChatMessagesUseCase;
@@ -86,3 +86,27 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
     }
   }
 }
+
+final chatNotifierProvider = StateNotifierProvider.family<ChatNotifier,
+    AsyncValue<List<ChatMessage>>, String>((ref, chatId) {
+  final userId = ref.watch(userIdProvider).maybeWhen(
+        data: (uid) => uid,
+        orElse: () => null,
+      );
+
+  if (userId == null) {
+    return ChatNotifier(
+      getChatMessagesUseCase: ref.watch(getChatMessagesUseCaseProvider),
+      sendChatMessageUseCase: ref.watch(sendChatMessageUseCaseProvider),
+      userId: '',
+      chatId: chatId,
+    )..clearState();
+  }
+
+  return ChatNotifier(
+    getChatMessagesUseCase: ref.watch(getChatMessagesUseCaseProvider),
+    sendChatMessageUseCase: ref.watch(sendChatMessageUseCaseProvider),
+    userId: userId,
+    chatId: chatId,
+  );
+});
