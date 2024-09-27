@@ -46,13 +46,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
     }
   }
 
-  void _jumpToBottom() {
-    if (_scrollController.hasClients) {
-      final maxScroll = _scrollController.position.maxScrollExtent;
-      _scrollController.jumpTo(maxScroll);
-    }
-  }
-
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       final maxScroll = _scrollController.position.maxScrollExtent;
@@ -90,7 +83,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(title: const Text('AI Chatbot')),
+      appBar: AppBar(
+        title: const Text('AI Chatbot'),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -100,7 +95,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                 data: (messages) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     if (!_initialLoadComplete) {
-                      _jumpToBottom();
+                      _scrollToBottom();
                       _initialLoadComplete = true;
                     } else {
                       _scrollToBottom();
@@ -119,7 +114,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       final message = messages[index];
                       return Padding(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 8.0),
+                          vertical: 8.0,
+                          horizontal: 8.0,
+                        ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -162,6 +159,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen>
                       decoration: const InputDecoration(
                         hintText: 'Type your message...',
                       ),
+                      minLines: 1,
+                      maxLines: 3,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
                       onSubmitted: (value) async {
                         if (value.isEmpty) return;
                         _controller.clear();

@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'common/utils/app_theme.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -22,12 +23,11 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp.router(
       routerConfig: router,
+      theme: ref.watch(themeProvider).theme,
+      darkTheme: ref.watch(themeProvider).darkTheme,
+      themeMode: ref.watch(themeProvider).themeMode,
       debugShowCheckedModeBanner: false,
       title: 'AI Assistant App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        // Customize the theme if needed
-      ),
     );
   }
 }

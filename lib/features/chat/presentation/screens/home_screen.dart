@@ -1,13 +1,14 @@
+import 'package:ai_assistant/common/utils/extension.dart';
+import 'package:ai_assistant/features/chat/presentation/notifiers/create_chat_notifier.dart';
+import 'package:ai_assistant/features/chat/presentation/notifiers/delete_chat_notifier.dart';
+import 'package:ai_assistant/features/chat/presentation/notifiers/get_all_chats_notifier.dart';
+import 'package:ai_assistant/features/chat/presentation/providers/presentation_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../notifiers/chat_notifier.dart';
-import '../notifiers/create_chat_notifier.dart';
-import '../notifiers/delete_chat_notifier.dart';
-import '../notifiers/get_all_chats_notifier.dart';
-import '../providers/presentation_providers.dart';
+import '../../../../common/utils/app_theme.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -56,19 +57,96 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
+    Future<void> _showThemeModeDialog(
+        BuildContext context, AppTheme themeNotifier, ThemeMode currentMode) {
+      return showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Select Theme Mode'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<ThemeMode>(
+                  title: const Text('Light Mode'),
+                  value: ThemeMode.light,
+                  groupValue: currentMode,
+                  onChanged: (ThemeMode? value) {
+                    themeNotifier.setLightMode();
+                    Navigator.of(context).pop();
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('Dark Mode'),
+                  value: ThemeMode.dark,
+                  groupValue: currentMode,
+                  onChanged: (ThemeMode? value) {
+                    themeNotifier.setDarkMode();
+                    Navigator.of(context).pop();
+                  },
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('System Default'),
+                  value: ThemeMode.system,
+                  groupValue: currentMode,
+                  onChanged: (ThemeMode? value) {
+                    themeNotifier.setSystemMode();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
     final userIdAsyncValue = ref.watch(userIdProvider);
     final uuid = ref.read(uuidProvider);
+    final isLoading = ref.watch(loadingProvider);
+    // Watch the theme provider to toggle between dark and light modes
+    final themeNotifier = ref.read(themeProvider.notifier);
+    final themeMode = ref.watch(themeProvider).themeMode;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Assistant App'),
+        title: Text(
+          'AI Assistant App',
+          style: context.textTheme.bodyMedium,
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              _showThemeModeDialog(context, themeNotifier, themeMode);
+            },
+          ),
+
+          // IconButton(
+          //   icon: Icon(themeMode == ThemeMode.dark
+          //       ? Icons.dark_mode
+          //       : Icons.light_mode),
+          //   onPressed: () {
+          //     // Toggle between light and dark mode
+          //     if (themeMode == ThemeMode.dark) {
+          //       themeNotifier.setLightMode();
+          //     } else {
+          //       themeNotifier.setDarkMode();
+          //     }
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
               context.push('/profile');
             },
           ),
+          // IconButton(
+          //   icon: const Icon(Icons.brightness_6),
+          //   onPressed: () {
+          //     //  showThemeModeDialog(context, ref);
+          //   },
+          // ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {
@@ -88,18 +166,23 @@ class HomeScreen extends ConsumerWidget {
                 final newChatId = uuid.v4();
 
                 try {
+                  ref.read(loadingProvider.notifier).state = true;
+
                   await ref
                       .read(createChatNotifierProvider.notifier)
                       .createChat(newChatId, userId, chatName);
+
+                  context.push('/chat/$newChatId');
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed to create chat: $e')),
                   );
+                } finally {
+                  ref.read(loadingProvider.notifier).state = false;
                 }
-                context.push('/chat/$newChatId');
               }
             },
-          ),
+          )
         ],
       ),
       drawer: Drawer(
@@ -115,8 +198,9 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(
                 height: 20,
               ),
-              const Flexible(
-                child: Text('Chat History'),
+              Flexible(
+                child: Text('Chat History',
+                    style: context.textTheme.headlineLarge),
               ),
               const SizedBox(
                 height: 10,
@@ -126,8 +210,11 @@ class HomeScreen extends ConsumerWidget {
                 child: ref.watch(userIdProvider).when(
                       data: (userId) {
                         if (userId == null) {
-                          return const Center(
-                            child: Text('No user is logged in'),
+                          return Center(
+                            child: Text(
+                              'No user is logged in',
+                              style: context.textTheme.bodySmall,
+                            ),
                           );
                         }
 
@@ -136,8 +223,9 @@ class HomeScreen extends ConsumerWidget {
                             .when(
                               data: (chats) {
                                 if (chats.isEmpty) {
-                                  return const Center(
-                                    child: Text('No chat history found'),
+                                  return Center(
+                                    child: Text('No chat history found',
+                                        style: context.textTheme.bodySmall),
                                   );
                                 }
                                 return ListView.builder(
@@ -154,31 +242,33 @@ class HomeScreen extends ConsumerWidget {
                                         color: Colors.red,
                                         alignment: Alignment.centerRight,
                                         padding: const EdgeInsets.symmetric(
-                                            horizontal: 20.0),
+                                          horizontal: 20.0,
+                                        ),
                                         child: const Icon(Icons.delete,
                                             color: Colors.white),
                                       ),
                                       onDismissed: (direction) async {
+                                        final scaffoldMessenger =
+                                            ScaffoldMessenger.of(context);
+
                                         try {
                                           await ref
                                               .read(deleteChatNotifierProvider
                                                   .notifier)
                                               .deleteChat(chatId, userId);
                                         } catch (e) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
+                                          scaffoldMessenger.showSnackBar(
                                             SnackBar(
                                               content: Text(
                                                   'Failed to delete chat: $e'),
                                             ),
                                           );
                                         }
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
+                                        scaffoldMessenger.showSnackBar(
                                           SnackBar(
                                             content: Text('$chatName deleted'),
                                             action: SnackBarAction(
-                                              label: '',
+                                              label: 'Undo',
                                               onPressed: () async {
                                                 // Optional undo action
                                               },
@@ -187,7 +277,8 @@ class HomeScreen extends ConsumerWidget {
                                         );
                                       },
                                       child: ListTile(
-                                        title: Text(chatName),
+                                        title: Text(chatName,
+                                            style: context.textTheme.bodySmall),
                                         trailing:
                                             const Icon(Icons.arrow_forward),
                                         onTap: () {
@@ -219,35 +310,42 @@ class HomeScreen extends ConsumerWidget {
           ),
         ),
       ),
-      body: userIdAsyncValue.when(
-        data: (userId) {
-          if (userId == null) {
-            return const Center(child: Text('No user is logged in'));
-          }
-          return Card(
-            child: ListTile(
-              title: const Text('Image Generation'),
-              onTap: () {
-                context.push('/image-generation');
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : userIdAsyncValue.when(
+              data: (userId) {
+                if (userId == null) {
+                  return const Center(child: Text('No user is logged in'));
+                }
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                      'Image Generation',
+                      style: context.textTheme.bodyMedium,
+                    ),
+                    onTap: () {
+                      context.push('/image-generation');
+                    },
+                  ),
+                )
+                    .animate()
+                    .slideY(
+                      begin: 1.0,
+                      end: 0.0,
+                      duration: 500.ms,
+                      curve: Curves.easeOut,
+                    )
+                    .fadeIn();
               },
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              error: (e, stack) => Center(
+                child: Text('Error: $e'),
+              ),
             ),
-          )
-              .animate()
-              .slideY(
-                begin: 1.0,
-                end: 0.0,
-                duration: 500.ms,
-                curve: Curves.easeOut,
-              )
-              .fadeIn();
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (e, stack) => Center(
-          child: Text('Error: $e'),
-        ),
-      ),
     );
   }
 }
