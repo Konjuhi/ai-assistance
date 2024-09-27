@@ -46,6 +46,11 @@ class ImageGenerationScreen extends ConsumerWidget {
               onPressed: () async {
                 final prompt = controller.text.trim();
                 if (prompt.isEmpty) return;
+
+                // Prevent multiple requests if loading is already happening
+                if (ref.read(imageNotifierProvider) is AsyncLoading) return;
+
+                // Generate the image
                 await imageNotifier.generateImage(prompt);
               },
               child: const Text('Generate Image'),

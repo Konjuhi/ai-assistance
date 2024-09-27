@@ -31,11 +31,15 @@ class FirebaseChatDataSource implements ChatDataSource {
     final chatExists = await chatDoc.get();
 
     if (!chatExists.exists) {
+      final chatModel = ChatModel(
+        chatId: chatId,
+        chatName: chatName,
+      );
+
       await chatDoc.set({
         'createdAt': FieldValue.serverTimestamp(),
-        'chatId': chatId,
         'userId': userId,
-        'chatName': chatName,
+        ...chatModel.toMap(),
       });
     }
   }

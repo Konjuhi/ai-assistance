@@ -1,7 +1,7 @@
+import 'package:ai_assistant/common/utils/assets.dart';
 import 'package:flutter/material.dart';
 
 import 'app_color_extension.dart';
-import 'assets.dart';
 
 class AppTypographyExtension extends ThemeExtension<AppTypographyExtension> {
   const AppTypographyExtension({

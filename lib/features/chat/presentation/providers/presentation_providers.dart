@@ -16,3 +16,4 @@ final userIdProvider = StreamProvider<String?>((ref) {
 });
 
 final loadingProvider = StateProvider<bool>((ref) => false);
+final deleteChatLoadingProvider = StateProvider<bool>((ref) => false);

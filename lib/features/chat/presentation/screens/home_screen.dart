@@ -1,152 +1,227 @@
-import 'package:ai_assistant/common/utils/extension.dart';
+import 'package:ai_assistant/common/common.dart';
 import 'package:ai_assistant/features/chat/presentation/notifiers/create_chat_notifier.dart';
 import 'package:ai_assistant/features/chat/presentation/notifiers/delete_chat_notifier.dart';
 import 'package:ai_assistant/features/chat/presentation/notifiers/get_all_chats_notifier.dart';
 import 'package:ai_assistant/features/chat/presentation/providers/presentation_providers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../common/utils/app_theme.dart';
-
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Future<String?> showChatNameDialog(BuildContext context, WidgetRef ref) {
-      final TextEditingController controller = TextEditingController();
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
-      return showDialog<String>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Enter Chat Name'),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(hintText: 'Chat name'),
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+
+    // Trigger the animation when the widget is first built
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Future<String?> showChatNameDialog(BuildContext context, WidgetRef ref) {
+    final TextEditingController controller = TextEditingController();
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Enter Chat Name'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(hintText: 'Chat name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
+            Consumer(
+              builder: (context, ref, _) {
+                final isLoading = ref.watch(loadingProvider);
+
+                return isLoading
+                    ? const CircularProgressIndicator()
+                    : TextButton(
+                        onPressed: () async {
+                          final chatName = controller.text.trim();
+                          if (chatName.isNotEmpty) {
+                            ref.read(loadingProvider.notifier).state = true;
+                            Navigator.of(context).pop(chatName);
+                          }
+                        },
+                        child: const Text('Create'),
+                      );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> showThemeModeDialog(
+      BuildContext context, AppTheme themeNotifier, ThemeMode currentMode) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Theme Mode'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<ThemeMode>(
+                title: const Text('Light Mode'),
+                value: ThemeMode.light,
+                groupValue: currentMode,
+                onChanged: (ThemeMode? value) {
+                  themeNotifier.setLightMode();
+                  Navigator.of(context).pop();
+                },
               ),
-              Consumer(
-                builder: (context, ref, _) {
-                  final isLoading = ref.watch(loadingProvider);
-
-                  return isLoading
-                      ? const CircularProgressIndicator()
-                      : TextButton(
-                          onPressed: () async {
-                            final chatName = controller.text.trim();
-                            if (chatName.isNotEmpty) {
-                              ref.read(loadingProvider.notifier).state = true;
-
-                              Navigator.of(context).pop(chatName);
-                            }
-                          },
-                          child: const Text('Create'),
-                        );
+              RadioListTile<ThemeMode>(
+                title: const Text('Dark Mode'),
+                value: ThemeMode.dark,
+                groupValue: currentMode,
+                onChanged: (ThemeMode? value) {
+                  themeNotifier.setDarkMode();
+                  Navigator.of(context).pop();
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text('System Default'),
+                value: ThemeMode.system,
+                groupValue: currentMode,
+                onChanged: (ThemeMode? value) {
+                  themeNotifier.setSystemMode();
+                  Navigator.of(context).pop();
                 },
               ),
             ],
-          );
-        },
-      );
-    }
+          ),
+        );
+      },
+    );
+  }
 
-    Future<void> _showThemeModeDialog(
-        BuildContext context, AppTheme themeNotifier, ThemeMode currentMode) {
-      return showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Select Theme Mode'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<ThemeMode>(
-                  title: const Text('Light Mode'),
-                  value: ThemeMode.light,
-                  groupValue: currentMode,
-                  onChanged: (ThemeMode? value) {
-                    themeNotifier.setLightMode();
-                    Navigator.of(context).pop();
+  Future<void> _deleteChatConfirmation(BuildContext context, WidgetRef ref,
+      String chatId, String chatName) async {
+    final shouldDelete = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text('Confirm Deletion'),
+              content: Text('Are you sure you want to delete "$chatName"?'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(false);
                   },
                 ),
-                RadioListTile<ThemeMode>(
-                  title: const Text('Dark Mode'),
-                  value: ThemeMode.dark,
-                  groupValue: currentMode,
-                  onChanged: (ThemeMode? value) {
-                    themeNotifier.setDarkMode();
-                    Navigator.of(context).pop();
-                  },
-                ),
-                RadioListTile<ThemeMode>(
-                  title: const Text('System Default'),
-                  value: ThemeMode.system,
-                  groupValue: currentMode,
-                  onChanged: (ThemeMode? value) {
-                    themeNotifier.setSystemMode();
-                    Navigator.of(context).pop();
+                TextButton(
+                  child: const Text('Delete'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(true);
                   },
                 ),
               ],
+            );
+          },
+        ) ??
+        false;
+
+    if (shouldDelete) {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      final userId = ref.read(userIdProvider).value;
+
+      if (userId != null) {
+        try {
+          // Set loading state
+          ref.read(deleteChatLoadingProvider.notifier).state = true;
+
+          // Delete chat
+          await ref.read(deleteChatNotifierProvider.notifier).deleteChat(
+                chatId,
+                userId,
+              );
+
+          // Close the drawer if open
+          if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+            _scaffoldKey.currentState?.openEndDrawer();
+          }
+
+          // Show confirmation Snackbar
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('$chatName deleted successfully'),
             ),
           );
-        },
-      );
+        } catch (e) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete chat: $e'),
+            ),
+          );
+        } finally {
+          // Stop loading state
+          ref.read(deleteChatLoadingProvider.notifier).state = false;
+        }
+      }
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     final userIdAsyncValue = ref.watch(userIdProvider);
     final uuid = ref.read(uuidProvider);
     final isLoading = ref.watch(loadingProvider);
-    // Watch the theme provider to toggle between dark and light modes
+
     final themeNotifier = ref.read(themeProvider.notifier);
     final themeMode = ref.watch(themeProvider).themeMode;
+    final isDeletingChat = ref.watch(deleteChatLoadingProvider);
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(
-          'AI Assistant App',
-          style: context.textTheme.bodyMedium,
-        ),
+        title: const Text('AI Assistant App'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              _showThemeModeDialog(context, themeNotifier, themeMode);
+              showThemeModeDialog(context, themeNotifier, themeMode);
             },
           ),
-
-          // IconButton(
-          //   icon: Icon(themeMode == ThemeMode.dark
-          //       ? Icons.dark_mode
-          //       : Icons.light_mode),
-          //   onPressed: () {
-          //     // Toggle between light and dark mode
-          //     if (themeMode == ThemeMode.dark) {
-          //       themeNotifier.setLightMode();
-          //     } else {
-          //       themeNotifier.setDarkMode();
-          //     }
-          //   },
-          // ),
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
               context.push('/profile');
             },
           ),
-          // IconButton(
-          //   icon: const Icon(Icons.brightness_6),
-          //   onPressed: () {
-          //     //  showThemeModeDialog(context, ref);
-          //   },
-          // ),
+          IconButton(
+            icon: const Icon(Icons.photo),
+            onPressed: () {
+              context.push('/images'); // Navigate to Image Grid
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {
@@ -188,8 +263,8 @@ class HomeScreen extends ConsumerWidget {
       drawer: Drawer(
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-            topRight: Radius.circular(0),
-            bottomRight: Radius.circular(0),
+            topRight: Radius.circular(16),
+            bottomRight: Radius.circular(16),
           ),
         ),
         child: SafeArea(
@@ -198,113 +273,120 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(
                 height: 20,
               ),
-              Flexible(
-                child: Text('Chat History',
-                    style: context.textTheme.headlineLarge),
+              Text(
+                'Chat History',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              // presentation/ui/home_screen.dart
+              const Divider(thickness: 1),
               Expanded(
-                child: ref.watch(userIdProvider).when(
-                      data: (userId) {
-                        if (userId == null) {
-                          return Center(
-                            child: Text(
-                              'No user is logged in',
-                              style: context.textTheme.bodySmall,
-                            ),
-                          );
-                        }
+                child: userIdAsyncValue.when(
+                  data: (userId) {
+                    if (userId == null) {
+                      return Center(
+                        child: Text(
+                          'No user is logged in',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      );
+                    }
 
-                        return ref
-                            .watch(getAllChatsNotifierProvider(userId))
-                            .when(
-                              data: (chats) {
-                                if (chats.isEmpty) {
-                                  return Center(
-                                    child: Text('No chat history found',
-                                        style: context.textTheme.bodySmall),
-                                  );
-                                }
-                                return ListView.builder(
-                                  itemCount: chats.length,
-                                  itemBuilder: (context, index) {
-                                    final chat = chats[index];
-                                    final chatId = chat.chatId;
-                                    final chatName = chat.chatName;
+                    return ref.watch(getAllChatsNotifierProvider(userId)).when(
+                          data: (chats) {
+                            if (chats.isEmpty) {
+                              return Center(
+                                child: Text(
+                                  'No chat history found',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              );
+                            }
+                            if (isDeletingChat) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
 
-                                    return Dismissible(
-                                      key: Key(chatId),
-                                      direction: DismissDirection.endToStart,
-                                      background: Container(
-                                        color: Colors.red,
-                                        alignment: Alignment.centerRight,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20.0,
+                            return ListView.builder(
+                              itemCount: chats.length,
+                              itemBuilder: (context, index) {
+                                final chat = chats[index];
+                                final chatId = chat.chatId;
+                                final chatName = chat.chatName;
+
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0, vertical: 4.0),
+                                  child: Material(
+                                    elevation: 3,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: ListTile(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      leading: const CircleAvatar(
+                                        backgroundColor: Colors.blueAccent,
+                                        child: Icon(
+                                          Icons.chat,
+                                          color: Colors.white,
                                         ),
-                                        child: const Icon(Icons.delete,
-                                            color: Colors.white),
                                       ),
-                                      onDismissed: (direction) async {
-                                        final scaffoldMessenger =
-                                            ScaffoldMessenger.of(context);
-
-                                        try {
-                                          await ref
-                                              .read(deleteChatNotifierProvider
-                                                  .notifier)
-                                              .deleteChat(chatId, userId);
-                                        } catch (e) {
-                                          scaffoldMessenger.showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                  'Failed to delete chat: $e'),
+                                      title: Text(
+                                        chatName,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                      subtitle: Text(
+                                        'Last message here...', // Placeholder for last message
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: Colors.grey,
                                             ),
-                                          );
-                                        }
-                                        scaffoldMessenger.showSnackBar(
-                                          SnackBar(
-                                            content: Text('$chatName deleted'),
-                                            action: SnackBarAction(
-                                              label: 'Undo',
-                                              onPressed: () async {
-                                                // Optional undo action
-                                              },
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: ListTile(
-                                        title: Text(chatName,
-                                            style: context.textTheme.bodySmall),
-                                        trailing:
-                                            const Icon(Icons.arrow_forward),
-                                        onTap: () {
-                                          Navigator.of(context).pop();
-                                          context.push('/chat/$chatId');
+                                      ),
+                                      trailing: PopupMenuButton<String>(
+                                        onSelected: (value) async {
+                                          if (value == 'delete') {
+                                            await _deleteChatConfirmation(
+                                                context, ref, chatId, chatName);
+                                          }
                                         },
+                                        itemBuilder: (BuildContext context) =>
+                                            <PopupMenuEntry<String>>[
+                                          const PopupMenuItem<String>(
+                                            value: 'delete',
+                                            child: Text('Delete'),
+                                          ),
+                                        ],
                                       ),
-                                    );
-                                  },
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        context.push('/chat/$chatId');
+                                      },
+                                    ),
+                                  ),
                                 );
                               },
-                              loading: () => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              error: (e, stack) => Center(
-                                child: Text('Error: $e'),
-                              ),
                             );
-                      },
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      error: (e, stack) => Center(
-                        child: Text('Error: $e'),
-                      ),
-                    ),
+                          },
+                          loading: () => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          error: (e, stack) => Center(
+                            child: Text('Error: $e'),
+                          ),
+                        );
+                  },
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  error: (e, stack) => Center(
+                    child: Text('Error: $e'),
+                  ),
+                ),
               )
             ],
           ),
@@ -319,25 +401,39 @@ class HomeScreen extends ConsumerWidget {
                 if (userId == null) {
                   return const Center(child: Text('No user is logged in'));
                 }
-                return Card(
-                  child: ListTile(
-                    title: Text(
-                      'Image Generation',
-                      style: context.textTheme.bodyMedium,
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 1),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: _animationController,
+                        curve: Curves.easeOut,
+                      ),
                     ),
-                    onTap: () {
-                      context.push('/image-generation');
-                    },
+                    child: Card(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 16),
+                        title: Text(
+                          'Image Generation',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        subtitle: const Text('Create AI-generated images'),
+                        trailing: const Icon(Icons.arrow_forward),
+                        onTap: () {
+                          context.push('/image-generation');
+                        },
+                      ),
+                    ),
                   ),
-                )
-                    .animate()
-                    .slideY(
-                      begin: 1.0,
-                      end: 0.0,
-                      duration: 500.ms,
-                      curve: Curves.easeOut,
-                    )
-                    .fadeIn();
+                );
               },
               loading: () => const Center(
                 child: CircularProgressIndicator(),

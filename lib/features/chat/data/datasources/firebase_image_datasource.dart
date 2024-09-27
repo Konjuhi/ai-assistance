@@ -7,7 +7,7 @@ abstract class ImageDataSource {
 
   Future<void> addImage(ImageModel image, String userId);
 
-  Stream<ImageModel?> getLastImage(String userId);
+  Future<void> deleteImage(String userId, String imageId);
 }
 
 class FirebaseImageDataSource implements ImageDataSource {
@@ -19,12 +19,14 @@ class FirebaseImageDataSource implements ImageDataSource {
   Stream<List<ImageModel>> getImages(String userId) {
     try {
       return firestore
-          .collection('image_history')
-          .where('userId', isEqualTo: userId)
+          .collection('users')
+          .doc(userId)
+          .collection('images')
+          .orderBy('timestamp', descending: true)
           .snapshots()
           .map((snapshot) {
         return snapshot.docs.map((doc) {
-          return ImageModel.fromMap(doc.data());
+          return ImageModel.fromMap(doc.data(), doc.id); // Pass document ID
         }).toList();
       });
     } catch (e, stackTrace) {
@@ -36,7 +38,7 @@ class FirebaseImageDataSource implements ImageDataSource {
   @override
   Future<void> addImage(ImageModel image, String userId) async {
     try {
-      await firestore.collection('image_history').add({
+      await firestore.collection('users').doc(userId).collection('images').add({
         'userId': userId,
         ...image.toMap(),
         'timestamp': FieldValue.serverTimestamp(),
@@ -48,27 +50,19 @@ class FirebaseImageDataSource implements ImageDataSource {
   }
 
   @override
-  Stream<ImageModel?> getLastImage(String userId) {
+  Future<void> deleteImage(String imageId, String userId) async {
     try {
-      return firestore
-          .collection('image_history')
-          .where('userId', isEqualTo: userId)
-          .snapshots()
-          .map((snapshot) {
-        if (snapshot.docs.isNotEmpty) {
-          final images = snapshot.docs.map((doc) {
-            return ImageModel.fromMap(doc.data());
-          }).toList();
-          images
-              .sort((a, b) => b.timestamp.compareTo(a.timestamp)); // Descending
-          return images.isNotEmpty ? images.first : null;
-        } else {
-          return null;
-        }
-      });
+      await firestore
+          .collection('users')
+          .doc(userId)
+          .collection('images')
+          .doc(imageId)
+          .delete();
     } catch (e, stackTrace) {
       throw ServerException(
-          message: 'Error fetching last image', stackTrace: stackTrace);
+        message: 'Error deleting image',
+        stackTrace: stackTrace,
+      );
     }
   }
 }

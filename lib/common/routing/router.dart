@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:ai_assistant/common/common.dart';
 import 'package:ai_assistant/features/chat/presentation/presentation.dart';
+import 'package:ai_assistant/features/chat/presentation/screens/image_details_screen.dart';
+import 'package:ai_assistant/features/chat/presentation/screens/image_grid_screen.dart';
 import 'package:ai_assistant/firebase_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -41,7 +43,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => HomeScreen(),
         routes: [
           GoRoute(
             path: 'chat/:chatId',
@@ -51,14 +53,32 @@ final routerProvider = Provider<GoRouter>((ref) {
             },
           ),
           GoRoute(
+            path: 'images',
+            builder: (context, state) => const ImageGridScreen(),
+          ),
+          GoRoute(
             path: 'image-generation',
             builder: (context, state) => const ImageGenerationScreen(),
+          ),
+          GoRoute(
+            path: 'imageDetail',
+            builder: (context, state) {
+              final Map<String, dynamic> extras =
+                  state.extra as Map<String, dynamic>;
+              return ImageDetailScreen(
+                imageUrl: extras['imageUrl'],
+                prompt: extras['prompt'],
+              );
+            },
           ),
           GoRoute(
             path: 'profile',
             builder: (context, state) => ProfileScreen(
               appBar: AppBar(
-                title: const Text('Profile'),
+                title: Text(
+                  'Profile',
+                  style: context.textTheme.bodyMedium,
+                ),
               ),
               providers: authProviders,
               actions: [

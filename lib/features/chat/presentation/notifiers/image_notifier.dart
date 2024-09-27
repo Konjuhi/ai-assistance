@@ -11,6 +11,7 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
   final GenerateImage generateImageUseCase;
   final GetImages getImagesUseCase;
   final String userId;
+  bool _isGenerating = false; // To prevent concurrent generation
 
   ImageNotifier({
     required this.generateImageUseCase,
@@ -42,6 +43,7 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
       print("Loading last image for user: $userId");
     }
 
+    // Listen for updates to the user's images
     getImagesUseCase(userId).listen(
       (Either<Failure, List<ImageEntity>> result) {
         result.fold(
@@ -52,13 +54,17 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
             }
           },
           (images) {
-            images.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
             if (images.isNotEmpty) {
-              if (kDebugMode) {
-                print("Loaded image: ${images.first.imageUrl}");
+              images.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+              final latestImage = images.first;
+
+              if (state is! AsyncData ||
+                  (state as AsyncData).value != latestImage) {
+                if (kDebugMode) {
+                  print("Loaded image: ${latestImage.imageUrl}");
+                }
+                state = AsyncData(latestImage);
               }
-              state = AsyncData(images.first);
             } else {
               if (kDebugMode) {
                 print("No images found for user: $userId");
@@ -78,14 +84,20 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
   }
 
   Future<void> generateImage(String prompt) async {
-    if (userId.isEmpty) return;
+    if (userId.isEmpty || _isGenerating) return;
+
+    _isGenerating = true;
+    print('Start generating image for prompt: $prompt');
 
     state = const AsyncLoading();
 
     try {
       final imageUrl = await ImageService.searchAiImage(prompt);
+      print('Image URL generated: $imageUrl');
+
       if (imageUrl.isNotEmpty) {
         final image = ImageEntity(
+          id: '', // Empty string for now, Firestore will generate this
           imageUrl: imageUrl,
           prompt: prompt,
           timestamp: DateTime.now(),
@@ -95,16 +107,24 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
             await generateImageUseCase(image, userId);
 
         result.fold(
-          (failure) => state = AsyncError(failure.message, StackTrace.current),
-          (_) => state = AsyncData(image),
+          (failure) {
+            print('Error saving image: ${failure.message}');
+            state = AsyncError(failure.message, StackTrace.current);
+          },
+          (_) {
+            print('Image successfully saved to state');
+            state = AsyncData(image);
+          },
         );
       } else {
+        print('No images found');
         state = AsyncError('No images found', StackTrace.current);
       }
-    } on AppException catch (e) {
-      state = AsyncError(e.message, StackTrace.current);
-    } catch (e, stack) {
-      state = AsyncError(e.toString(), stack);
+    } catch (e) {
+      print('Error generating image: $e');
+      state = AsyncError(e.toString(), StackTrace.current);
+    } finally {
+      _isGenerating = false;
     }
   }
 }
