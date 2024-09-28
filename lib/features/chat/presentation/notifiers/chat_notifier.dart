@@ -1,11 +1,13 @@
-import 'package:ai_assistant/features/chat/data/datasources/remote/ai_service.dart';
 import 'package:ai_assistant/features/chat/domain/domain.dart';
-import 'package:ai_assistant/features/chat/presentation/providers/presentation_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../domain/usecases/get_ai_response.dart';
+import '../providers/presentation_providers.dart';
 
 class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final GetChatMessages getChatMessagesUseCase;
   final SendChatMessage sendChatMessageUseCase;
+  final GetAIResponse getAIResponseUseCase;
   final String userId;
   final String chatId;
 
@@ -14,6 +16,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   ChatNotifier({
     required this.getChatMessagesUseCase,
     required this.sendChatMessageUseCase,
+    required this.getAIResponseUseCase,
     required this.userId,
     required this.chatId,
   }) : super(const AsyncLoading()) {
@@ -57,7 +60,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
         userId,
       );
 
-      final response = await AIService.getAnswer(message);
+      final response = await getAIResponseUseCase.call(message);
       if (!mounted) return null;
 
       final responseMessage = response.fold(
@@ -65,6 +68,7 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
         (success) => success,
       );
 
+      // Sending AI response message
       await sendChatMessageUseCase(
         ChatMessage(
           sender: 'Bot',
@@ -97,6 +101,7 @@ final chatNotifierProvider = StateNotifierProvider.family<ChatNotifier,
     return ChatNotifier(
       getChatMessagesUseCase: ref.watch(getChatMessagesUseCaseProvider),
       sendChatMessageUseCase: ref.watch(sendChatMessageUseCaseProvider),
+      getAIResponseUseCase: ref.watch(getAIResponseUseCaseProvider),
       userId: '',
       chatId: chatId,
     )..clearState();
@@ -105,6 +110,7 @@ final chatNotifierProvider = StateNotifierProvider.family<ChatNotifier,
   return ChatNotifier(
     getChatMessagesUseCase: ref.watch(getChatMessagesUseCaseProvider),
     sendChatMessageUseCase: ref.watch(sendChatMessageUseCaseProvider),
+    getAIResponseUseCase: ref.watch(getAIResponseUseCaseProvider),
     userId: userId,
     chatId: chatId,
   );

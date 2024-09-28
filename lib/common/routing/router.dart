@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/chat/presentation/screens/translation_screen.dart';
+
 class AuthStateChangeNotifier extends ChangeNotifier {
   AuthStateChangeNotifier() {
     FirebaseAuth.instance.authStateChanges().listen((user) {
@@ -49,6 +51,10 @@ final routerProvider = Provider<GoRouter>((ref) {
               final chatId = state.params['chatId'];
               return ChatScreen(chatId: chatId!);
             },
+          ),
+          GoRoute(
+            path: 'translation',
+            builder: (context, state) => const TranslationScreen(),
           ),
           GoRoute(
             path: 'images',

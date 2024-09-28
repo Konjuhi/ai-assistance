@@ -1,5 +1,9 @@
+import 'package:ai_assistant/features/chat/data/datasources/remote/ai_service.dart';
 import 'package:ai_assistant/features/chat/data/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../../common/errors/failures.dart';
 
 abstract class ChatDataSource {
   Stream<List<ChatMessageModel>> getChatMessages(String chatId, String userId);
@@ -13,6 +17,8 @@ abstract class ChatDataSource {
   Stream<List<ChatModel>> getAllChats(String userId);
 
   Future<void> deleteChat(String chatId, String userId);
+
+  Future<Either<Failure, String>> getAIResponse(String question); // New Method
 }
 
 class FirebaseChatDataSource implements ChatDataSource {
@@ -109,5 +115,10 @@ class FirebaseChatDataSource implements ChatDataSource {
     }
 
     await chatDoc.delete();
+  }
+
+  @override
+  Future<Either<Failure, String>> getAIResponse(String question) {
+    return AIService.getAnswer(question);
   }
 }

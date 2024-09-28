@@ -1,4 +1,5 @@
 import 'package:ai_assistant/features/chat/presentation/notifiers/image_notifier.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,7 +26,14 @@ class ImageGenerationScreen extends ConsumerWidget {
                   }
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Image.network(image.imageUrl),
+                    child: CachedNetworkImage(
+                      imageUrl: image.imageUrl,
+                      placeholder: (context, url) =>
+                          const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
+                      fit: BoxFit.cover,
+                    ),
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),

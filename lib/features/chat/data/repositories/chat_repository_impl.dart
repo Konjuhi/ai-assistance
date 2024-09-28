@@ -60,4 +60,9 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<void> deleteChat(String chatId, String userId) async {
     await dataSource.deleteChat(chatId, userId);
   }
+
+  @override
+  Future<Either<Failure, String>> getAIResponse(String question) {
+    return dataSource.getAIResponse(question);
+  }
 }

@@ -21,4 +21,5 @@ abstract class ChatRepository {
       String chatId, String userId, String chatName);
 
   Future<void> deleteChat(String chatId, String userId);
+  Future<Either<Failure, String>> getAIResponse(String question);
 }

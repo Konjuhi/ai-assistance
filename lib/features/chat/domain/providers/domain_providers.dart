@@ -2,7 +2,9 @@ import 'package:ai_assistant/features/chat/data/providers/data_provider.dart';
 import 'package:ai_assistant/features/chat/domain/domain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../usecases/delete_image.dart';
+import '../usecases/get_ai_response.dart';
+import '../usecases/search_ai_image.dart';
+import '../usecases/translate_text.dart';
 
 final getChatMessagesUseCaseProvider = Provider<GetChatMessages>((ref) {
   return GetChatMessages(ref.watch(chatRepositoryProvider));
@@ -32,3 +34,14 @@ final getAllChatsUseCaseProvider = Provider<GetAllChats>((ref) {
 final deleteImageUseCaseProvider = Provider<DeleteImage>((ref) {
   return DeleteImage(ref.watch(imageRepositoryProvider));
 });
+final translateTextUseCaseProvider = Provider<TranslateText>((ref) {
+  return TranslateText(ref.watch(translationRepositoryProvider));
+});
+final getAIResponseUseCaseProvider = Provider<GetAIResponse>((ref) {
+  return GetAIResponse(ref.watch(chatRepositoryProvider));
+});
+
+final searchAiImageUseCaseProvider = Provider<SearchAiImage>((ref) {
+  return SearchAiImage(repository: ref.watch(imageRepositoryProvider));
+});
+

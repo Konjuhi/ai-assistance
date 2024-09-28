@@ -27,7 +27,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       duration: const Duration(milliseconds: 500),
     );
 
-    // Trigger the animation when the widget is first built
     _animationController.forward();
   }
 
@@ -408,26 +407,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         curve: Curves.easeOut,
                       ),
                     ),
-                    child: Card(
-                      elevation: 5,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            title: Text(
+                              'Image Generation',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            subtitle: const Text('Create AI-generated images'),
+                            trailing: const Icon(Icons.arrow_forward),
+                            onTap: () {
+                              context.push('/image-generation');
+                            },
+                          ),
                         ),
-                        title: Text(
-                          'Image Generation',
-                          style: Theme.of(context).textTheme.bodyLarge,
+                        const SizedBox(
+                          height: 20,
                         ),
-                        subtitle: const Text('Create AI-generated images'),
-                        trailing: const Icon(Icons.arrow_forward),
-                        onTap: () {
-                          context.push('/image-generation');
-                        },
-                      ),
+                        Card(
+                            elevation: 5,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              title: Text(
+                                'Text Translation',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              subtitle: const Text(
+                                  'Translate text between languages'),
+                              trailing: const Icon(Icons.arrow_forward),
+                              onTap: () {
+                                context.push('/translation');
+                              },
+                            )),
+                      ],
                     ),
                   ),
                 );

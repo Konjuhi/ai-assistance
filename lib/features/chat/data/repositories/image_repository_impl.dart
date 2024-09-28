@@ -12,6 +12,16 @@ class ImageRepositoryImpl implements ImageRepository {
   ImageRepositoryImpl(this.dataSource);
 
   @override
+  Future<Either<Failure, String>> searchAiImage(String prompt) async {
+    try {
+      final result = await dataSource.searchAiImage(prompt);
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Stream<Either<Failure, List<ImageEntity>>> getImages(String userId) async* {
     try {
       final stream = dataSource.getImages(userId);
@@ -55,8 +65,7 @@ class ImageRepositoryImpl implements ImageRepository {
   Future<Either<Failure, void>> deleteImage(
       String imageId, String userId) async {
     try {
-      await dataSource.deleteImage(
-          imageId, userId); // Implement the deletion in the data source
+      await dataSource.deleteImage(imageId, userId);
       return const Right(null);
     } on AppException catch (e) {
       return Left(ServerFailure(message: e.message, stackTrace: e.stackTrace));
