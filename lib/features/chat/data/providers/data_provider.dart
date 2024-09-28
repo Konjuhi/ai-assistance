@@ -38,3 +38,4 @@ final translationDataSourceProvider = Provider<TranslationDataSource>((ref) {
 final translationRepositoryProvider = Provider<TranslationRepository>((ref) {
   return TranslationRepositoryImpl(ref.watch(translationDataSourceProvider));
 });
+// Repository Provider

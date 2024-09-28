@@ -17,4 +17,14 @@ class TranslationRepositoryImpl implements TranslationRepository {
   Future<void> saveTranslation(String userId, TranslationEntity translation) {
     return dataSource.saveTranslation(userId, translation as TranslationModel);
   }
+
+  @override
+  Future<List<TranslationEntity>> fetchTranslationHistory(String userId) {
+    return dataSource.fetchTranslationHistory(userId);
+  }
+
+  @override
+  Future<void> deleteAllTranslations(String userId) {
+    return dataSource.deleteAllTranslations(userId);
+  }
 }

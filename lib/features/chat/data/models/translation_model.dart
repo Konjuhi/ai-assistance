@@ -23,6 +23,7 @@ class TranslationModel extends TranslationEntity {
       'translatedText': translatedText,
       'fromLanguage': fromLanguage,
       'toLanguage': toLanguage,
+      'timestamp': DateTime.now().toIso8601String(),
     };
   }
 }
