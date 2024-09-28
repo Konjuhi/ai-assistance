@@ -155,21 +155,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
       if (userId != null) {
         try {
-          // Set loading state
           ref.read(deleteChatLoadingProvider.notifier).state = true;
 
-          // Delete chat
           await ref.read(deleteChatNotifierProvider.notifier).deleteChat(
                 chatId,
                 userId,
               );
 
-          // Close the drawer if open
           if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
             _scaffoldKey.currentState?.openEndDrawer();
           }
 
-          // Show confirmation Snackbar
           scaffoldMessenger.showSnackBar(
             SnackBar(
               content: Text('$chatName deleted successfully'),
@@ -182,7 +178,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
           );
         } finally {
-          // Stop loading state
           ref.read(deleteChatLoadingProvider.notifier).state = false;
         }
       }
@@ -317,7 +312,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0, vertical: 4.0),
+                                    horizontal: 8.0,
+                                    vertical: 4.0,
+                                  ),
                                   child: Material(
                                     elevation: 3,
                                     borderRadius: BorderRadius.circular(12),
@@ -326,10 +323,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       leading: const CircleAvatar(
-                                        backgroundColor: Colors.blueAccent,
                                         child: Icon(
                                           Icons.chat,
-                                          color: Colors.white,
                                         ),
                                       ),
                                       title: Text(
@@ -339,7 +334,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                             .bodyMedium,
                                       ),
                                       subtitle: Text(
-                                        'Last message here...', // Placeholder for last message
+                                        'Last message here...',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -420,7 +415,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 16),
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
                         title: Text(
                           'Image Generation',
                           style: Theme.of(context).textTheme.bodyLarge,

@@ -2,8 +2,6 @@ import 'dart:developer';
 
 import 'package:ai_assistant/common/common.dart';
 import 'package:ai_assistant/features/chat/presentation/presentation.dart';
-import 'package:ai_assistant/features/chat/presentation/screens/image_details_screen.dart';
-import 'package:ai_assistant/features/chat/presentation/screens/image_grid_screen.dart';
 import 'package:ai_assistant/firebase_providers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
@@ -43,7 +41,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => HomeScreen(),
+        builder: (context, state) => const HomeScreen(),
         routes: [
           GoRoute(
             path: 'chat/:chatId',

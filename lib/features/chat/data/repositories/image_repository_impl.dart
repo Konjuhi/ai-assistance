@@ -1,11 +1,10 @@
+import 'package:ai_assistant/common/errors/app_exceptions.dart';
 import 'package:ai_assistant/common/errors/failures.dart';
 import 'package:ai_assistant/features/chat/data/datasources/firebase_image_datasource.dart';
 import 'package:ai_assistant/features/chat/data/models/image_model.dart';
 import 'package:ai_assistant/features/chat/domain/entities/image_entity.dart';
 import 'package:ai_assistant/features/chat/domain/repositories/image_repository.dart';
 import 'package:dartz/dartz.dart';
-
-import '../../../../common/errors/app_exceptions.dart';
 
 class ImageRepositoryImpl implements ImageRepository {
   final ImageDataSource dataSource;

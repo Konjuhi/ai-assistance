@@ -1,17 +1,16 @@
 import 'package:ai_assistant/common/common.dart';
 import 'package:ai_assistant/features/chat/data/datasources/datasource.dart';
 import 'package:ai_assistant/features/chat/domain/domain.dart';
+import 'package:ai_assistant/features/chat/presentation/providers/presentation_providers.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../providers/presentation_providers.dart';
 
 class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
   final GenerateImage generateImageUseCase;
   final GetImages getImagesUseCase;
   final String userId;
-  bool _isGenerating = false; // To prevent concurrent generation
+  bool _isGenerating = false;
 
   ImageNotifier({
     required this.generateImageUseCase,
@@ -43,7 +42,6 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
       print("Loading last image for user: $userId");
     }
 
-    // Listen for updates to the user's images
     getImagesUseCase(userId).listen(
       (Either<Failure, List<ImageEntity>> result) {
         result.fold(
@@ -87,17 +85,21 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
     if (userId.isEmpty || _isGenerating) return;
 
     _isGenerating = true;
-    print('Start generating image for prompt: $prompt');
+    if (kDebugMode) {
+      print('Start generating image for prompt: $prompt');
+    }
 
     state = const AsyncLoading();
 
     try {
       final imageUrl = await ImageService.searchAiImage(prompt);
-      print('Image URL generated: $imageUrl');
+      if (kDebugMode) {
+        print('Image URL generated: $imageUrl');
+      }
 
       if (imageUrl.isNotEmpty) {
         final image = ImageEntity(
-          id: '', // Empty string for now, Firestore will generate this
+          id: '',
           imageUrl: imageUrl,
           prompt: prompt,
           timestamp: DateTime.now(),
@@ -108,20 +110,28 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
 
         result.fold(
           (failure) {
-            print('Error saving image: ${failure.message}');
+            if (kDebugMode) {
+              print('Error saving image: ${failure.message}');
+            }
             state = AsyncError(failure.message, StackTrace.current);
           },
           (_) {
-            print('Image successfully saved to state');
+            if (kDebugMode) {
+              print('Image successfully saved to state');
+            }
             state = AsyncData(image);
           },
         );
       } else {
-        print('No images found');
+        if (kDebugMode) {
+          print('No images found');
+        }
         state = AsyncError('No images found', StackTrace.current);
       }
     } catch (e) {
-      print('Error generating image: $e');
+      if (kDebugMode) {
+        print('Error generating image: $e');
+      }
       state = AsyncError(e.toString(), StackTrace.current);
     } finally {
       _isGenerating = false;

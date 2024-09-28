@@ -1,7 +1,6 @@
+import 'package:ai_assistant/features/chat/presentation/notifiers/image_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../notifiers/image_notifier.dart';
 
 class ImageGenerationScreen extends ConsumerWidget {
   const ImageGenerationScreen({super.key});
@@ -47,10 +46,8 @@ class ImageGenerationScreen extends ConsumerWidget {
                 final prompt = controller.text.trim();
                 if (prompt.isEmpty) return;
 
-                // Prevent multiple requests if loading is already happening
                 if (ref.read(imageNotifierProvider) is AsyncLoading) return;
 
-                // Generate the image
                 await imageNotifier.generateImage(prompt);
               },
               child: const Text('Generate Image'),
