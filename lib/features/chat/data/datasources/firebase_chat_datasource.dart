@@ -40,6 +40,7 @@ class FirebaseChatDataSource implements ChatDataSource {
       final chatModel = ChatModel(
         chatId: chatId,
         chatName: chatName,
+        timestamp: DateTime.now(),
       );
 
       await chatDoc.set({
@@ -89,6 +90,7 @@ class FirebaseChatDataSource implements ChatDataSource {
         .collection('users')
         .doc(userId)
         .collection('chats')
+        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
@@ -96,6 +98,7 @@ class FirebaseChatDataSource implements ChatDataSource {
         return ChatModel.fromMap({
           'chatId': doc.id,
           'chatName': data['chatName'],
+          'createdAt': data['createdAt'],
         });
       }).toList();
     });

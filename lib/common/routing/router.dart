@@ -108,9 +108,8 @@ final routerProvider = Provider<GoRouter>((ref) {
                     },
                   ),
                 ],
-                title: Text(
+                title: const Text(
                   'Profile',
-                  style: context.textTheme.bodyMedium,
                 ),
               ),
               providers: authProviders,

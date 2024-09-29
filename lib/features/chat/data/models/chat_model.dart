@@ -1,15 +1,21 @@
-import 'package:ai_assistant/features/chat/domain/entities/chat.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../domain/entities/chat.dart';
 
 class ChatModel extends Chat {
   ChatModel({
     required super.chatId,
     required super.chatName,
+    super.timestamp,
   });
 
   factory ChatModel.fromMap(Map<String, dynamic> map) {
     return ChatModel(
-      chatId: map['chatId'],
-      chatName: map['chatName'] ?? 'Chat ${map['chatId']}',
+      chatId: map['chatId'] ?? '',
+      chatName: map['chatName'] ?? '',
+      timestamp: map['createdAt'] != null
+          ? (map['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 
@@ -17,6 +23,7 @@ class ChatModel extends Chat {
     return {
       'chatId': chatId,
       'chatName': chatName,
+      'createdAt': timestamp,
     };
   }
 }

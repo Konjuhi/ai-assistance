@@ -1,4 +1,4 @@
-import '../../data/models/chat_model.dart';
+import '../entities/chat.dart';
 import '../repositories/chat_repository.dart';
 
 class GetAllChats {
@@ -6,7 +6,7 @@ class GetAllChats {
 
   GetAllChats(this.repository);
 
-  Stream<List<ChatModel>> call(String userId) {
+  Stream<List<Chat>> call(String userId) {
     return repository.getAllChats(userId);
   }
 }

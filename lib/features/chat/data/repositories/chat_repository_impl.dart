@@ -46,7 +46,7 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Stream<List<ChatModel>> getAllChats(String userId) {
+  Stream<List<Chat>> getAllChats(String userId) {
     return dataSource.getAllChats(userId);
   }
 
