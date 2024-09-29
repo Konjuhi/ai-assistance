@@ -14,16 +14,16 @@ class TranslateNotifier
   final DeleteTranslationHistory deleteTranslationHistoryUseCase;
   final String userId;
 
-  String? fromLanguage;
-  String? toLanguage;
-  String textToTranslate = '';
-
   TranslateNotifier({
     required this.translateUseCase,
     required this.fetchTranslationHistoryUseCase,
     required this.deleteTranslationHistoryUseCase,
     required this.userId,
   }) : super(const AsyncData([]));
+
+  String? fromLanguage;
+  String? toLanguage;
+  String textToTranslate = '';
 
   Future<void> translate() async {
     if (fromLanguage == null || toLanguage == null || textToTranslate.isEmpty) {
@@ -43,6 +43,38 @@ class TranslateNotifier
     );
   }
 
+  void updateFromLanguage(String from) {
+    fromLanguage = from;
+  }
+
+  void updateToLanguage(String to) {
+    toLanguage = to;
+  }
+
+  void updateTextToTranslate(String text) {
+    textToTranslate = text;
+  }
+
+  void clearTranslationState() {
+    state = const AsyncData([]);
+    fromLanguage = null;
+    toLanguage = null;
+    textToTranslate = '';
+  }
+}
+
+class TranslationHistoryNotifier
+    extends StateNotifier<AsyncValue<List<TranslationEntity>>> {
+  final FetchTranslationHistory fetchTranslationHistoryUseCase;
+  final DeleteTranslationHistory deleteTranslationHistoryUseCase;
+  final String userId;
+
+  TranslationHistoryNotifier({
+    required this.fetchTranslationHistoryUseCase,
+    required this.deleteTranslationHistoryUseCase,
+    required this.userId,
+  }) : super(const AsyncData([]));
+
   Future<void> loadTranslationHistory() async {
     state = const AsyncLoading();
     final result = await fetchTranslationHistoryUseCase.call(userId);
@@ -60,25 +92,6 @@ class TranslateNotifier
       (_) => state = const AsyncData([]),
     );
   }
-
-  void updateFromLanguage(String from) {
-    fromLanguage = from;
-  }
-
-  void updateToLanguage(String to) {
-    toLanguage = to;
-  }
-
-  void updateTextToTranslate(String text) {
-    textToTranslate = text;
-  }
-
-  void clearState() {
-    state = const AsyncData([]);
-    fromLanguage = null;
-    toLanguage = null;
-    textToTranslate = '';
-  }
 }
 
 final translateNotifierProvider = StateNotifierProvider<TranslateNotifier,
@@ -90,6 +103,22 @@ final translateNotifierProvider = StateNotifierProvider<TranslateNotifier,
 
   return TranslateNotifier(
     translateUseCase: ref.watch(translateTextUseCaseProvider),
+    fetchTranslationHistoryUseCase:
+        ref.watch(fetchTranslationHistoryUseCaseProvider),
+    deleteTranslationHistoryUseCase:
+        ref.watch(deleteTranslationHistoryUseCaseProvider),
+    userId: userId ?? '',
+  );
+});
+
+final translationHistoryNotifierProvider = StateNotifierProvider<
+    TranslationHistoryNotifier, AsyncValue<List<TranslationEntity>>>((ref) {
+  final userId = ref.watch(userIdProvider).maybeWhen(
+        data: (uid) => uid,
+        orElse: () => null,
+      );
+
+  return TranslationHistoryNotifier(
     fetchTranslationHistoryUseCase:
         ref.watch(fetchTranslationHistoryUseCaseProvider),
     deleteTranslationHistoryUseCase:

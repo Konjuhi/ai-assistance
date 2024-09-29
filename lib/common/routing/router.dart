@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/chat/presentation/screens/translation_history_screen.dart';
 import '../../features/chat/presentation/screens/translation_screen.dart';
 
 class AuthStateChangeNotifier extends ChangeNotifier {
@@ -51,6 +52,23 @@ final routerProvider = Provider<GoRouter>((ref) {
               final chatId = state.params['chatId'];
               return ChatScreen(chatId: chatId!);
             },
+          ),
+          GoRoute(
+            path: 'translation-history',
+            pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              child: const TranslationHistoryScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 1),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            ),
           ),
           GoRoute(
             path: 'translation',
