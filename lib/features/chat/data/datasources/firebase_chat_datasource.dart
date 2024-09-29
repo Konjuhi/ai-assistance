@@ -1,9 +1,8 @@
+import 'package:ai_assistant/common/errors/failures.dart';
 import 'package:ai_assistant/features/chat/data/datasources/remote/ai_service.dart';
 import 'package:ai_assistant/features/chat/data/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
-
-import '../../../../common/errors/failures.dart';
 
 abstract class ChatDataSource {
   Stream<List<ChatMessageModel>> getChatMessages(String chatId, String userId);
@@ -18,7 +17,7 @@ abstract class ChatDataSource {
 
   Future<void> deleteChat(String chatId, String userId);
 
-  Future<Either<Failure, String>> getAIResponse(String question); // New Method
+  Future<Either<Failure, String>> getAIResponse(String question);
 }
 
 class FirebaseChatDataSource implements ChatDataSource {

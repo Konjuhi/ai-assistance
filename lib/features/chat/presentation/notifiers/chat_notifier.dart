@@ -1,8 +1,7 @@
 import 'package:ai_assistant/features/chat/domain/domain.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/get_ai_response.dart';
+import 'package:ai_assistant/features/chat/presentation/providers/presentation_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../domain/usecases/get_ai_response.dart';
-import '../providers/presentation_providers.dart';
 
 class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
   final GetChatMessages getChatMessagesUseCase;

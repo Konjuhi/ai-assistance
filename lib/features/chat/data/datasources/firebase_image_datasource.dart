@@ -44,7 +44,7 @@ class FirebaseImageDataSource implements ImageDataSource {
           .snapshots()
           .map((snapshot) {
         return snapshot.docs.map((doc) {
-          return ImageModel.fromMap(doc.data(), doc.id); // Pass document ID
+          return ImageModel.fromMap(doc.data(), doc.id);
         }).toList();
       });
     } catch (e, stackTrace) {

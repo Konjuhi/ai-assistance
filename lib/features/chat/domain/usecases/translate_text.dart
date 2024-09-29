@@ -1,8 +1,7 @@
 import 'package:ai_assistant/common/errors/failures.dart';
+import 'package:ai_assistant/features/chat/domain/entities/translation_entity.dart';
+import 'package:ai_assistant/features/chat/domain/repositories/translation_repository.dart';
 import 'package:dartz/dartz.dart';
-
-import '../entities/translation_entity.dart';
-import '../repositories/translation_repository.dart';
 
 class TranslateText {
   final TranslationRepository repository;
@@ -19,7 +18,8 @@ class TranslateText {
     }
   }
 
-  Future<void> saveTranslation(String userId, TranslationEntity translation) async {
+  Future<void> saveTranslation(
+      String userId, TranslationEntity translation) async {
     await repository.saveTranslation(userId, translation);
   }
 }

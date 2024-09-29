@@ -1,22 +1,21 @@
+import 'package:ai_assistant/common/errors/failures.dart';
 import 'package:ai_assistant/features/chat/domain/domain.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/search_ai_image.dart';
+import 'package:ai_assistant/features/chat/presentation/providers/presentation_providers.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../common/errors/failures.dart';
-import '../../domain/usecases/search_ai_image.dart';
-import '../providers/presentation_providers.dart';
 
 class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
   final GenerateImage generateImageUseCase;
   final GetImages getImagesUseCase;
-  final SearchAiImage searchAiImageUseCase; // Use Case
+  final SearchAiImage searchAiImageUseCase;
   final String userId;
   bool _isGenerating = false;
 
   ImageNotifier({
     required this.generateImageUseCase,
     required this.getImagesUseCase,
-    required this.searchAiImageUseCase, // Inject Use Case
+    required this.searchAiImageUseCase,
     required this.userId,
   }) : super(const AsyncLoading()) {
     _loadLastImage();
@@ -66,7 +65,6 @@ class ImageNotifier extends StateNotifier<AsyncValue<ImageEntity?>> {
     state = const AsyncLoading();
 
     try {
-      // Use the Use Case to search for AI images
       final response = await searchAiImageUseCase.call(prompt);
       response.fold(
         (failure) {
