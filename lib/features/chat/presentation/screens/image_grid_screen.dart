@@ -62,10 +62,6 @@ class ImageGridScreen extends ConsumerWidget {
                                         image.prompt,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
                                       ),
                                     ),
                                     PopupMenuButton<String>(

@@ -19,13 +19,12 @@ class ImageDetailScreen extends StatelessWidget {
           prompt,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 18),
         ),
       ),
       body: Center(
         child: InteractiveViewer(
           minScale: 1.0,
-          maxScale: 4.0, // Allows zooming in up to 4x
+          maxScale: 4.0,
           child: Hero(
             tag: imageUrl,
             child: CachedNetworkImage(
