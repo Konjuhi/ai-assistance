@@ -1,4 +1,3 @@
-import 'package:ai_assistant/common/common.dart';
 import 'package:ai_assistant/features/chat/presentation/notifiers/create_chat_notifier.dart';
 import 'package:ai_assistant/features/chat/presentation/notifiers/delete_chat_notifier.dart';
 import 'package:ai_assistant/features/chat/presentation/notifiers/get_all_chats_notifier.dart';
@@ -77,50 +76,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Future<void> showThemeModeDialog(
-      BuildContext context, AppTheme themeNotifier, ThemeMode currentMode) {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Theme Mode'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RadioListTile<ThemeMode>(
-                title: const Text('Light Mode'),
-                value: ThemeMode.light,
-                groupValue: currentMode,
-                onChanged: (ThemeMode? value) {
-                  themeNotifier.setLightMode();
-                  Navigator.of(context).pop();
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: const Text('Dark Mode'),
-                value: ThemeMode.dark,
-                groupValue: currentMode,
-                onChanged: (ThemeMode? value) {
-                  themeNotifier.setDarkMode();
-                  Navigator.of(context).pop();
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: const Text('System Default'),
-                value: ThemeMode.system,
-                groupValue: currentMode,
-                onChanged: (ThemeMode? value) {
-                  themeNotifier.setSystemMode();
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _deleteChatConfirmation(BuildContext context, WidgetRef ref,
       String chatId, String chatName) async {
     final shouldDelete = await showDialog<bool>(
@@ -189,8 +144,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final uuid = ref.read(uuidProvider);
     final isLoading = ref.watch(loadingProvider);
 
-    final themeNotifier = ref.read(themeProvider.notifier);
-    final themeMode = ref.watch(themeProvider).themeMode;
     final isDeletingChat = ref.watch(deleteChatLoadingProvider);
 
     return Scaffold(
@@ -199,9 +152,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         title: const Text('AI Assistant App'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.photo),
             onPressed: () {
-              showThemeModeDialog(context, themeNotifier, themeMode);
+              context.push('/images');
             },
           ),
           IconButton(
@@ -210,48 +163,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               context.push('/profile');
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.photo),
-            onPressed: () {
-              context.push('/images'); // Navigate to Image Grid
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              final chatName = await showChatNameDialog(context, ref);
-
-              if (chatName != null && chatName.isNotEmpty) {
-                final userId = ref.read(userIdProvider).value;
-                if (userId == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please log in to create a new chat.'),
-                    ),
-                  );
-                  return;
-                }
-
-                final newChatId = uuid.v4();
-
-                try {
-                  ref.read(loadingProvider.notifier).state = true;
-
-                  await ref
-                      .read(createChatNotifierProvider.notifier)
-                      .createChat(newChatId, userId, chatName);
-
-                  context.push('/chat/$newChatId');
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to create chat: $e')),
-                  );
-                } finally {
-                  ref.read(loadingProvider.notifier).state = false;
-                }
-              }
-            },
-          )
         ],
       ),
       drawer: Drawer(
@@ -420,6 +331,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               horizontal: 16,
                             ),
                             title: Text(
+                              'Create New Chat',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            subtitle: const Text('Start a new conversation'),
+                            trailing: const Icon(Icons.arrow_forward),
+                            onTap: () async {
+                              final chatName =
+                                  await showChatNameDialog(context, ref);
+
+                              if (chatName != null && chatName.isNotEmpty) {
+                                final userId = ref.read(userIdProvider).value;
+                                if (userId == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Please log in to create a new chat.'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                final newChatId = uuid.v4();
+
+                                try {
+                                  ref.read(loadingProvider.notifier).state =
+                                      true;
+
+                                  await ref
+                                      .read(createChatNotifierProvider.notifier)
+                                      .createChat(newChatId, userId, chatName);
+
+                                  context.push('/chat/$newChatId');
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content:
+                                            Text('Failed to create chat: $e')),
+                                  );
+                                } finally {
+                                  ref.read(loadingProvider.notifier).state =
+                                      false;
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
+                            title: Text(
                               'Image Generation',
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
@@ -434,26 +405,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           height: 20,
                         ),
                         Card(
-                            elevation: 5,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 16,
                             ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 16,
-                              ),
-                              title: Text(
-                                'Text Translation',
-                                style: Theme.of(context).textTheme.bodyLarge,
-                              ),
-                              subtitle: const Text(
-                                  'Translate text between languages'),
-                              trailing: const Icon(Icons.arrow_forward),
-                              onTap: () {
-                                context.push('/translation');
-                              },
-                            )),
+                            title: Text(
+                              'Text Translation',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            subtitle:
+                                const Text('Translate text between languages'),
+                            trailing: const Icon(Icons.arrow_forward),
+                            onTap: () {
+                              context.push('/translation');
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),

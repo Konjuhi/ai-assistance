@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/chat/presentation/screens/translation_history_screen.dart';
 import '../../features/chat/presentation/screens/translation_screen.dart';
+import '../functions/show_theme_mode_dialog.dart';
 
 class AuthStateChangeNotifier extends ChangeNotifier {
   AuthStateChangeNotifier() {
@@ -25,6 +26,8 @@ class AuthStateChangeNotifier extends ChangeNotifier {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authNotifier = AuthStateChangeNotifier();
+  final themeNotifier = ref.read(themeProvider.notifier);
+  final themeMode = ref.watch(themeProvider).themeMode;
 
   return GoRouter(
     initialLocation: '/',
@@ -97,6 +100,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'profile',
             builder: (context, state) => ProfileScreen(
               appBar: AppBar(
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    onPressed: () {
+                      showThemeModeDialog(context, themeNotifier, themeMode);
+                    },
+                  ),
+                ],
                 title: Text(
                   'Profile',
                   style: context.textTheme.bodyMedium,
