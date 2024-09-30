@@ -1,8 +1,7 @@
+import 'package:ai_assistant/common/errors/failures.dart';
+import 'package:ai_assistant/features/chat/domain/entities/translation_entity.dart';
+import 'package:ai_assistant/features/chat/domain/repositories/translation_repository.dart';
 import 'package:dartz/dartz.dart';
-
-import '../../../../common/errors/failures.dart';
-import '../entities/translation_entity.dart';
-import '../repositories/translation_repository.dart';
 
 class FetchTranslationHistory {
   final TranslationRepository repository;

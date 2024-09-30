@@ -7,7 +7,8 @@ abstract class TranslationDataSource {
   Future<TranslationModel> translateText(String from, String to, String text);
   Future<void> saveTranslation(String userId, TranslationModel translation);
   Future<List<TranslationModel>> fetchTranslationHistory(String userId);
-  Future<void> deleteAllTranslations(String userId); // New method
+  Future<void> deleteAllTranslations(String userId);
+  Map<String, String> getLanguages();
 }
 
 class TranslatorPlusDataSource implements TranslationDataSource {
@@ -70,5 +71,10 @@ class TranslatorPlusDataSource implements TranslationDataSource {
     }
 
     await batch.commit();
+  }
+
+  @override
+  Map<String, String> getLanguages() {
+    return TranslationService.jsonLang;
   }
 }

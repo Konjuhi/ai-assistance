@@ -1,23 +1,20 @@
+import 'package:ai_assistant/features/chat/domain/entities/translation_entity.dart';
+import 'package:ai_assistant/features/chat/domain/providers/domain_providers.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/get_language.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/translate_text.dart';
+import 'package:ai_assistant/features/chat/presentation/providers/presentation_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../domain/entities/translation_entity.dart';
-import '../../domain/providers/domain_providers.dart';
-import '../../domain/usecases/delete_translation_history.dart';
-import '../../domain/usecases/fetch_translation_history.dart';
-import '../../domain/usecases/translate_text.dart';
-import '../providers/presentation_providers.dart';
 
 class TranslateNotifier
     extends StateNotifier<AsyncValue<List<TranslationEntity>>> {
   final TranslateText translateUseCase;
-  final FetchTranslationHistory fetchTranslationHistoryUseCase;
-  final DeleteTranslationHistory deleteTranslationHistoryUseCase;
+
+  final GetLanguages getLanguagesUseCase;
   final String userId;
 
   TranslateNotifier({
     required this.translateUseCase,
-    required this.fetchTranslationHistoryUseCase,
-    required this.deleteTranslationHistoryUseCase,
+    required this.getLanguagesUseCase,
     required this.userId,
   }) : super(const AsyncData([]));
 
@@ -27,7 +24,7 @@ class TranslateNotifier
 
   Future<void> translate() async {
     if (fromLanguage == null || toLanguage == null || textToTranslate.isEmpty) {
-      return; // Validation
+      return;
     }
 
     state = const AsyncLoading();
@@ -55,42 +52,15 @@ class TranslateNotifier
     textToTranslate = text;
   }
 
+  Map<String, String> getAvailableLanguages() {
+    return getLanguagesUseCase.call();
+  }
+
   void clearTranslationState() {
     state = const AsyncData([]);
     fromLanguage = null;
     toLanguage = null;
     textToTranslate = '';
-  }
-}
-
-class TranslationHistoryNotifier
-    extends StateNotifier<AsyncValue<List<TranslationEntity>>> {
-  final FetchTranslationHistory fetchTranslationHistoryUseCase;
-  final DeleteTranslationHistory deleteTranslationHistoryUseCase;
-  final String userId;
-
-  TranslationHistoryNotifier({
-    required this.fetchTranslationHistoryUseCase,
-    required this.deleteTranslationHistoryUseCase,
-    required this.userId,
-  }) : super(const AsyncData([]));
-
-  Future<void> loadTranslationHistory() async {
-    state = const AsyncLoading();
-    final result = await fetchTranslationHistoryUseCase.call(userId);
-    result.fold(
-      (failure) => state = AsyncError(failure.message, StackTrace.current),
-      (history) => state = AsyncData(history),
-    );
-  }
-
-  Future<void> deleteAllTranslationHistory() async {
-    state = const AsyncLoading();
-    final result = await deleteTranslationHistoryUseCase.call(userId);
-    result.fold(
-      (failure) => state = AsyncError(failure.message, StackTrace.current),
-      (_) => state = const AsyncData([]),
-    );
   }
 }
 
@@ -103,26 +73,7 @@ final translateNotifierProvider = StateNotifierProvider<TranslateNotifier,
 
   return TranslateNotifier(
     translateUseCase: ref.watch(translateTextUseCaseProvider),
-    fetchTranslationHistoryUseCase:
-        ref.watch(fetchTranslationHistoryUseCaseProvider),
-    deleteTranslationHistoryUseCase:
-        ref.watch(deleteTranslationHistoryUseCaseProvider),
-    userId: userId ?? '',
-  );
-});
-
-final translationHistoryNotifierProvider = StateNotifierProvider<
-    TranslationHistoryNotifier, AsyncValue<List<TranslationEntity>>>((ref) {
-  final userId = ref.watch(userIdProvider).maybeWhen(
-        data: (uid) => uid,
-        orElse: () => null,
-      );
-
-  return TranslationHistoryNotifier(
-    fetchTranslationHistoryUseCase:
-        ref.watch(fetchTranslationHistoryUseCaseProvider),
-    deleteTranslationHistoryUseCase:
-        ref.watch(deleteTranslationHistoryUseCaseProvider),
+    getLanguagesUseCase: ref.watch(getLanguagesUseCaseProvider),
     userId: userId ?? '',
   );
 });

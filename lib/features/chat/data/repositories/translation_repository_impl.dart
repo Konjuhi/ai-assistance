@@ -1,7 +1,7 @@
-import '../../domain/entities/translation_entity.dart';
-import '../../domain/repositories/translation_repository.dart';
-import '../datasources/translation_datasource.dart';
-import '../models/translation_model.dart';
+import 'package:ai_assistant/features/chat/data/datasources/translation_datasource.dart';
+import 'package:ai_assistant/features/chat/data/models/translation_model.dart';
+import 'package:ai_assistant/features/chat/domain/entities/translation_entity.dart';
+import 'package:ai_assistant/features/chat/domain/repositories/translation_repository.dart';
 
 class TranslationRepositoryImpl implements TranslationRepository {
   final TranslationDataSource dataSource;
@@ -26,5 +26,10 @@ class TranslationRepositoryImpl implements TranslationRepository {
   @override
   Future<void> deleteAllTranslations(String userId) {
     return dataSource.deleteAllTranslations(userId);
+  }
+
+  @override
+  Map<String, String> getLanguages() {
+    return dataSource.getLanguages();
   }
 }

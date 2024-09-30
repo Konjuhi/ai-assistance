@@ -1,7 +1,6 @@
+import 'package:ai_assistant/features/chat/presentation/notifiers/translation_history_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../notifiers/translation_notifier.dart';
 
 class TranslationHistoryScreen extends ConsumerStatefulWidget {
   const TranslationHistoryScreen({super.key});

@@ -5,4 +5,5 @@ export 'generate_images.dart';
 export 'get_all_chats.dart';
 export 'get_chat_messages.dart';
 export 'get_images.dart';
+export 'get_language.dart';
 export 'send_chat_messages.dart';

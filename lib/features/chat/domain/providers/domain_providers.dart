@@ -54,3 +54,8 @@ final deleteTranslationHistoryUseCaseProvider =
     Provider<DeleteTranslationHistory>((ref) {
   return DeleteTranslationHistory(ref.watch(translationRepositoryProvider));
 });
+
+final getLanguagesUseCaseProvider = Provider<GetLanguages>((ref) {
+  final repository = ref.watch(translationRepositoryProvider);
+  return GetLanguages(repository);
+});
