@@ -43,17 +43,26 @@ class _TranslationHistoryScreenState
       appBar: AppBar(
         title: const Text('Translation History'),
         actions: [
-          DropdownButton<String>(
-            value: selectedLanguageFilter,
-            hint: const Text('Filter by Language'),
-            items: <String?>[null, 'English', 'Albanian', 'Slovenian', 'German']
-                .map((lang) {
-              return DropdownMenuItem<String>(
-                value: lang,
-                child: Text(lang ?? 'All'),
-              );
-            }).toList(),
-            onChanged: _onLanguageFilterChanged,
+          SizedBox(
+            width: 65,
+            child: DropdownButton<String>(
+              value: selectedLanguageFilter,
+              hint: const Text('Filter by Language'),
+              items: <String?>[
+                null,
+                'English',
+                'Albanian',
+                'Slovenian',
+                'German'
+              ].map((lang) {
+                return DropdownMenuItem<String>(
+                  value: lang,
+                  child: Text(lang ?? 'All'),
+                );
+              }).toList(),
+              onChanged: _onLanguageFilterChanged,
+              isExpanded: true,
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.delete),
