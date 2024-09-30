@@ -23,13 +23,13 @@ class ImageDetailScreen extends StatelessWidget {
       ),
       body: Center(
         child: InteractiveViewer(
-          minScale: 1.0,
+          minScale: 0.5,
           maxScale: 4.0,
           child: Hero(
             tag: imageUrl,
             child: CachedNetworkImage(
               imageUrl: imageUrl,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               placeholder: (context, url) => const Center(
