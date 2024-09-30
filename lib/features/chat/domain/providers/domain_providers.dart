@@ -1,12 +1,11 @@
 import 'package:ai_assistant/features/chat/data/providers/data_provider.dart';
 import 'package:ai_assistant/features/chat/domain/domain.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/delete_translation_history.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/fetch_translation_history.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/get_ai_response.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/search_ai_image.dart';
+import 'package:ai_assistant/features/chat/domain/usecases/translate_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../usecases/delete_translation_history.dart';
-import '../usecases/fetch_translation_history.dart';
-import '../usecases/get_ai_response.dart';
-import '../usecases/search_ai_image.dart';
-import '../usecases/translate_text.dart';
 
 final getChatMessagesUseCaseProvider = Provider<GetChatMessages>((ref) {
   return GetChatMessages(ref.watch(chatRepositoryProvider));

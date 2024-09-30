@@ -67,7 +67,6 @@ class ChatNotifier extends StateNotifier<AsyncValue<List<ChatMessage>>> {
         (success) => success,
       );
 
-      // Sending AI response message
       await sendChatMessageUseCase(
         ChatMessage(
           sender: 'Bot',

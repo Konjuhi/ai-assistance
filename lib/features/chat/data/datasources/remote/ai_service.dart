@@ -2,13 +2,17 @@ import 'dart:developer';
 
 import 'package:ai_assistant/common/errors/failures.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AIService {
-  static const String apiKey = 'AIzaSyBmOrD6Ft2GtLwFV1_RYRsZEfPX74WWJJQ';
-
   static Future<Either<Failure, String>> getAnswer(String question) async {
     try {
+      final apiKey = dotenv.env['GOOGLE_API_KEY'];
+      if (apiKey == null) {
+        throw Exception('API key not found');
+      }
+
       log('API Key: $apiKey');
 
       final model = GenerativeModel(
