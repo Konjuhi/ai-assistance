@@ -52,10 +52,13 @@ class ImageGridScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.only(
+                                    left: 10.0,
+                                    right: 10.0,
+                                    top: 10.0,
+                                    bottom: 10.0),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
                                       child: Text(
@@ -64,25 +67,14 @@ class ImageGridScreen extends ConsumerWidget {
                                         maxLines: 1,
                                       ),
                                     ),
-                                    PopupMenuButton<String>(
-                                      onSelected: (value) {
-                                        if (value == 'delete') {
-                                          _showDeleteConfirmationDialog(
-                                              context, ref, image.id);
-                                        }
+                                    const Spacer(),
+                                    GestureDetector(
+                                      onTap: () {
+                                        _showDeleteConfirmationDialog(
+                                            context, ref, image.id);
                                       },
-                                      itemBuilder: (BuildContext context) =>
-                                          <PopupMenuEntry<String>>[
-                                        const PopupMenuItem<String>(
-                                          value: 'delete',
-                                          child: Text('Delete'),
-                                        ),
-                                      ],
-                                      icon: const Icon(
-                                        Icons.more_vert,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
+                                      child: const Icon(Icons.close),
+                                    )
                                   ],
                                 ),
                               ),

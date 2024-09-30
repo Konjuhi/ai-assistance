@@ -29,8 +29,9 @@ class ImageDetailScreen extends StatelessWidget {
             tag: imageUrl,
             child: CachedNetworkImage(
               imageUrl: imageUrl,
-              fit: BoxFit.contain,
-              width: double.infinity,
+              fit: BoxFit.cover,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               placeholder: (context, url) => const Center(
                 child: CircularProgressIndicator(),
               ),

@@ -12,6 +12,8 @@ class TranslationHistoryScreen extends ConsumerStatefulWidget {
 
 class _TranslationHistoryScreenState
     extends ConsumerState<TranslationHistoryScreen> {
+  String? selectedLanguageFilter;
+
   @override
   void initState() {
     super.initState();
@@ -23,6 +25,16 @@ class _TranslationHistoryScreenState
     });
   }
 
+  void _onLanguageFilterChanged(String? newLanguage) {
+    setState(() {
+      selectedLanguageFilter = newLanguage;
+    });
+
+    ref
+        .read(translationHistoryNotifierProvider.notifier)
+        .loadTranslationHistory(languageFilter: selectedLanguageFilter);
+  }
+
   @override
   Widget build(BuildContext context) {
     final historyState = ref.watch(translationHistoryNotifierProvider);
@@ -31,6 +43,18 @@ class _TranslationHistoryScreenState
       appBar: AppBar(
         title: const Text('Translation History'),
         actions: [
+          DropdownButton<String>(
+            value: selectedLanguageFilter,
+            hint: const Text('Filter by Language'),
+            items: <String?>[null, 'English', 'Albanian', 'Slovenian', 'German']
+                .map((lang) {
+              return DropdownMenuItem<String>(
+                value: lang,
+                child: Text(lang ?? 'All'),
+              );
+            }).toList(),
+            onChanged: _onLanguageFilterChanged,
+          ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () async {
@@ -82,6 +106,9 @@ class _TranslationHistoryScreenState
               return ListTile(
                 title: Text(translation.originalText),
                 subtitle: Text(translation.translatedText),
+                trailing: Text(
+                  '${translation.fromLanguage} -> ${translation.toLanguage}',
+                ),
               );
             },
           );

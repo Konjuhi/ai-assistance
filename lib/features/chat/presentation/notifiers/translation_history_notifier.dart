@@ -17,12 +17,21 @@ class TranslationHistoryNotifier
     required this.userId,
   }) : super(const AsyncData([]));
 
-  Future<void> loadTranslationHistory() async {
+  Future<void> loadTranslationHistory({String? languageFilter}) async {
     state = const AsyncLoading();
     final result = await fetchTranslationHistoryUseCase.call(userId);
     result.fold(
       (failure) => state = AsyncError(failure.message, StackTrace.current),
-      (history) => state = AsyncData(history),
+      (history) {
+        if (languageFilter != null) {
+          history = history
+              .where((translation) =>
+                  translation.fromLanguage == languageFilter ||
+                  translation.toLanguage == languageFilter)
+              .toList();
+        }
+        state = AsyncData(history);
+      },
     );
   }
 
