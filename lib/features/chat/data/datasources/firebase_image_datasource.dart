@@ -24,7 +24,6 @@ class FirebaseImageDataSource implements ImageDataSource {
   Future<String> searchAiImage(String prompt) async {
     try {
       final imageUrl = await ImageService.searchAiImage(prompt);
-      log('Image URL fetched from service: $imageUrl');
       return imageUrl;
     } catch (e, stackTrace) {
       log('searchAiImage Error in FirebaseImageDataSource: $e');

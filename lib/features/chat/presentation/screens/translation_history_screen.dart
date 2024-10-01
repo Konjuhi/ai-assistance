@@ -41,10 +41,10 @@ class _TranslationHistoryScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Translation History'),
+        title: const Text('History'),
         actions: [
           SizedBox(
-            width: 65,
+            width: 100,
             child: DropdownButton<String>(
               value: selectedLanguageFilter,
               hint: const Text('Filter by Language'),
