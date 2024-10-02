@@ -76,7 +76,7 @@ The project follows a clean architecture approach and is structured into three m
 ## Screenshots
 
 ### Home Screen
-![Home Screen](assets/screenshots/home-light.png)
+![Home Screen](assets/screenshots/home-light.PNG)
 
 
 
