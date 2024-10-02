@@ -82,6 +82,9 @@ The project follows a clean architecture approach and is structured into three m
 <img src="assets/screenshots/home-light.PNG" alt="Home Screen" width="400"/>
 <img src="assets/screenshots/home-dark.PNG" alt="Home Screen" width="400"/>
 
+### Image Generation
+<img src="assets/screenshots/image-promt-dark.PNG" alt="Image Generation" width="400"/>
+
 ### Image Screen
 <img src="assets/screenshots/image-dark.PNG" alt="Image Screen" width="400"/>
 
@@ -97,8 +100,6 @@ The project follows a clean architecture approach and is structured into three m
 ### Chat Message
 <img src="assets/screenshots/messages-dark.PNG" alt="Chat Message" width="400"/>
 
-### Image Generation
-<img src="assets/screenshots/image-promt-dark.PNG" alt="Image Generation" width="400"/>
 
 
 
