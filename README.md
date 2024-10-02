@@ -75,21 +75,30 @@ The project follows a clean architecture approach and is structured into three m
 
 ## Screenshots
 
+### Splash Screen
+<img src="assets/screenshots/splash-screen-light.PNG" alt="Splash Screen" width="400"/>
+
 ### Home Screen
 <img src="assets/screenshots/home-light.PNG" alt="Home Screen" width="400"/>
 <img src="assets/screenshots/home-dark.PNG" alt="Home Screen" width="400"/>
 
-### Splash Screen
-<img src="assets/screenshots/splash-screen-light.PNG" alt="Splash Screen" width="400"/>
-
 ### Image Screen
 <img src="assets/screenshots/image-dark.PNG" alt="Image Screen" width="400"/>
 
+### Text Translation
+<img src="assets/screenshots/history-dark.PNG" alt="Text Translation" width="400"/>
+
 ### History Screen
-<img src="assets/screenshots/history-dark.PNG" alt="History Screen" width="400"/>
+<img src="assets/screenshots/history-language-dark.PNG" alt="History Screen" width="400"/>
 
 ### Chat Screen
 <img src="assets/screenshots/drawer-chat-dark.PNG" alt="Chat Screen" width="400"/>
+
+### Chat Message
+<img src="assets/screenshots/messages-dark.PNG" alt="Chat Message" width="400"/>
+
+### Image Generation
+<img src="assets/screenshots/image-promt-dark.PNG" alt="Image Generation" width="400"/>
 
 
 
