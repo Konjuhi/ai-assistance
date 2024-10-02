@@ -1,6 +1,6 @@
 # AI Assistant App
 
-**AI Assistant** is a mobile application ,it includes Chat with Gemini, Image Generation, Language Translation. Users can register and log in to access their personalized AI features, manage their data, and make the most out of the intelligent services provided by the app.
+**AI Assistant** is a mobile application, which includes Chat with Gemini, Image Generation, and Language Translation. Users can register and log in to access their personalized AI features, manage their data, and make the most out of the intelligent services provided by the app.
 
 ## Features
 - **AI Chat with Gemini:** Engage in conversations with an AI assistant using Gemini integration.
@@ -11,15 +11,14 @@
 - **Translation History:** Access the history of translations and apply filters to view specific translations.
 - **User Authentication:** Register and log in to personalize the experience.
 
-## Installation
+## Technology Stack
+- **Flutter**: Cross-platform mobile framework
+- **Firebase Firestore**: For user authentication and data storage (chats, images, translations)
+- **Google Generative AI (Gemini)**: For AI-based conversation functionality
+- **Unsplash API**: For AI image generation
 
-### Prerequisites
-- Flutter SDK (version 3.0 or above)
-- Android Studio or Xcode for platform-specific deployment
-- An Unsplash API Key
-- A Gemini API Key (Google Generative AI)
 
-### Setup
+## Setup
 
 1. **Setting Up Environment Variables:**
    The app requires certain API keys to interact with different services. You'll need to create an `.env` file in the root of the project and add the following keys:
@@ -30,13 +29,18 @@
     UNSPLASH_ACCESS_KEY=your_unsplash_api_key_here
     ```
 
+2. **Firebase Setup:**
+   - Follow [Firebase Documentation](https://firebase.google.com/docs/flutter/setup) to add Firebase to your Flutter project.
+   - Download `google-services.json` for Android and `GoogleService-Info.plist` for iOS and add them to the respective directories.
+   - Enable Firestore and Authentication in your Firebase console.
+
 
 ## Using the Application
 
 1. **User Authentication:**
    - Launch the app.
    - Register a new account or log in using existing credentials.
-  
+
 2. **Chat with AI (Gemini):**
    - From the home screen, tap on "Create New Chat".
    - Enter your prompt and get AI-based responses.
@@ -59,7 +63,7 @@
 ## Project Structure
 The project follows a clean architecture approach and is structured into three main layers:
 
-1. **Data Layer:** Responsible for data-related tasks like accessing the APIs, databases, and mapping data models.
+1. **Data Layer:** Responsible for data-related tasks like accessing the APIs, Firebase Firestore, and mapping data models.
     - `/data/datasources/`
     - `/data/repositories/`
 
@@ -72,6 +76,11 @@ The project follows a clean architecture approach and is structured into three m
     - `/presentation/screens/`
     - `/presentation/notifiers/`
     - `/presentation/providers/`
+
+## Firebase Firestore Integration
+- **User Authentication**: Firebase Authentication is used for registering and logging in users securely.
+- **Data Storage**: Firebase Firestore is used for storing chat history, generated images, and translation history, enabling easy access across multiple devices for a user.
+- **Realtime Updates**: Firestore ensures that the app provides realtime updates for chat, translation history, and other personalized data.
 
 ## Screenshots
 
@@ -100,10 +109,6 @@ The project follows a clean architecture approach and is structured into three m
 ### Chat Message
 <img src="assets/screenshots/messages-dark.PNG" alt="Chat Message" width="400"/>
 
-
-
-
-
 ## Contributing
 Feel free to submit a pull request if you would like to contribute to this project.
 
@@ -113,6 +118,4 @@ Feel free to submit a pull request if you would like to contribute to this proje
 ## Contact
 If you have any questions or issues regarding the app, feel free to reach out.
 
----
 
-This version is suitable for GitHub and includes all the necessary sections to guide users and contributors.
