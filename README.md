@@ -76,12 +76,21 @@ The project follows a clean architecture approach and is structured into three m
 ## Screenshots
 
 ### Home Screen
-![Home Screen](assets/screenshots/home-light.PNG)
-![Home Screen](assets/screenshots/home-dark.PNG)
-![Splash Screen](assets/screenshots/splash-screen-light.PNG)
-![Image Screen](assets/screenshots/image-dark.PNG)
-![History Screen](assets/screenshots/history-dark.PNG)
-![Chat Screen](assets/screenshots/drawer-chat-dark.PNG)
+<img src="assets/screenshots/home-light.PNG" alt="Home Screen" width="400"/>
+<img src="assets/screenshots/home-dark.PNG" alt="Home Screen" width="400"/>
+
+### Splash Screen
+<img src="assets/screenshots/splash-screen-light.PNG" alt="Splash Screen" width="400"/>
+
+### Image Screen
+<img src="assets/screenshots/image-dark.PNG" alt="Image Screen" width="400"/>
+
+### History Screen
+<img src="assets/screenshots/history-dark.PNG" alt="History Screen" width="400"/>
+
+### Chat Screen
+<img src="assets/screenshots/drawer-chat-dark.PNG" alt="Chat Screen" width="400"/>
+
 
 
 
