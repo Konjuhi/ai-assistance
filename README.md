@@ -77,6 +77,11 @@ The project follows a clean architecture approach and is structured into three m
 
 ### Home Screen
 ![Home Screen](assets/screenshots/home-light.PNG)
+![Home Screen](assets/screenshots/home-dark.PNG)
+![Splash Screen](assets/screenshots/splash-screen-light.PNG)
+![Image Screen](assets/screenshots/image-dark.PNG)
+![History Screen](assets/screenshots/history-dark.PNG)
+![Chat Screen](assets/screenshots/drawer-chat-dark.PNG)
 
 
 
