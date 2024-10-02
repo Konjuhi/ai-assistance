@@ -73,9 +73,12 @@ The project follows a clean architecture approach and is structured into three m
     - `/presentation/notifiers/`
     - `/presentation/providers/`
 
-
 ## Screenshots
-*Include screenshots of the app demonstrating various features like Chat, Image Generation, Translation, etc.*
+
+### Home Screen
+![Home Screen](assets/screenshots/home-light.png)
+
+
 
 ## Contributing
 Feel free to submit a pull request if you would like to contribute to this project.
