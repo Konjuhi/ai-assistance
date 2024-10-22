@@ -2,6 +2,10 @@
 
 **AI Assistant** is a mobile application, which includes Chat with Gemini, Image Generation, and Language Translation. Users can register and log in to access their personalized AI features, manage their data, and make the most out of the intelligent services provided by the app.
 
+For testing purposes, you can visit the landing page for the AI Assistant app here:  
+[AI Assistant App Website](https://konjuhi.github.io/automatic-app-landing-page/)
+
+
 ## Features
 - **AI Chat with Gemini:** Engage in conversations with an AI assistant using Gemini integration.
 - **AI Image Generation:** Generate AI-based images using the Unsplash API.
